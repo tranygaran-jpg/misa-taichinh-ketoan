@@ -3,7 +3,8 @@
   padding:8px 12px;font-size:11px;font-weight:800;white-space:nowrap}
 .overview-button:hover{background:#d4ecfc}
 .year-logic{font-size:10px;line-height:1.3;color:#376d91;background:#eff8ff;border:1px solid #cde5f3;
-  padding:7px 9px;border-radius:6px;white-space:nowrap;flex:none;font-weight:700}
+  padding:7px 9px;border-radius:6px;white-space:nowrap;flex:none;font-weight:700;cursor:pointer}
+.year-logic:hover{background:#d8eefb;border-color:#91cce9}
 .intro{height:74px;min-height:74px}
 .intro-sub{font-size:17px;color:#44769c;font-weight:700}
 #dashboard{height:912px;margin-top:16px}
@@ -33,11 +34,12 @@
 .donut-legend{gap:23px}
 .donut-legend .legend-label{font-size:16px}.donut-legend .legend-value{font-size:19px}
 .chart-grid.revenue .chart-heat .card-body{display:flex;flex-direction:column;justify-content:stretch}
-.chart-grid.revenue .heatmap{flex:1;height:calc(100% - 25px);margin:0}
+.chart-grid.revenue .heatmap{flex:0 1 auto;height:auto;margin:0;border-spacing:3px 1px}
 .chart-grid.revenue .heatmap th:first-child{width:34%}
-.chart-grid.revenue .heatmap .seg-label{font-size:12px;line-height:1.15;padding:3px 4px}
-.chart-grid.revenue .heatmap td{font-size:13px;padding:4px 2px}
+.chart-grid.revenue .heatmap .seg-label{font-size:11.5px;line-height:1.1;padding:2px 3px}
+.chart-grid.revenue .heatmap td{font-size:12.5px;padding:2px 2px}
 .chart-grid.revenue .heatmap .cell-n{font-size:10px}
+.chart-grid.revenue .heat-foot{font-size:10px;margin:4px 3px 0}
 .heatmap .small-sample{color:#b76c20;font-weight:800}
 .heatmap .small-sample .seg-n{color:#a75e1e}
 .heatmap td{font-size:15px;padding:7px 3px}
@@ -67,7 +69,7 @@
 .analysis-plot:has(>.overview-steps){height:196px}
 .analysis-plot:has(>.donut-layout){height:306px}
 .analysis-plot:has(>.horizontal-bars){height:320px}
-.analysis-plot:has(>.heatmap){height:340px}
+.analysis-plot:has(>.heatmap){height:auto;min-height:335px;overflow:visible}
 .analysis-plot:has(>.upset-scroll){height:315px}
 .analysis-plot>svg{height:100%;width:100%;max-width:100%}
 .analysis-plot>.horizontal-bars{width:100%;padding:0 10px}
@@ -75,7 +77,7 @@
 .analysis-plot .donut-wrap{width:290px;height:290px;flex-basis:290px}
 .analysis-plot>.upset-scroll{width:100%;height:100%}
 .analysis-plot>.donut-layout{width:100%}
-.analysis-plot>.heatmap{height:100%;width:100%}
+.analysis-plot>.heatmap{height:auto;width:100%}
 .analysis-plot:has(>.heatmap){display:block}
 .analysis-plot .heatmap th{font-size:11px}
 .analysis-plot .heatmap td{font-size:12px}
@@ -97,6 +99,17 @@
   border-radius:7px;padding:11px 13px;font-size:11px;font-weight:800}
 .analysis-actions button:hover{background:#d7effd;border-color:#83c5e9}
 .analysis-shortcuts small{display:block;font-size:10px;line-height:1.6;color:#8a9eae}
+.year-dialog{width:min(520px,calc(100vw - 32px));border:1px solid #b9dbef;border-radius:14px;
+  background:#fff;color:#2b587c;padding:22px 25px;font-family:'Be Vietnam Pro',Arial,sans-serif;
+  box-shadow:0 25px 80px rgba(13,54,95,.3)}
+.year-dialog::backdrop{background:rgba(8,37,68,.48);backdrop-filter:blur(4px)}
+.year-dialog-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:12px}
+.year-dialog h2{font-size:21px;line-height:1.3;margin:0;color:#155a8e}
+.year-dialog button{border:1px solid #cde3f3;border-radius:7px;color:#286a96;background:#f1f8fe;
+  width:32px;height:32px;font-size:15px;font-weight:800}
+.year-dialog p,.year-dialog li{font-size:13px;line-height:1.7;margin:10px 0}
+.year-dialog ul{padding-left:21px;margin:12px 0}
+.year-dialog .year-dialog-note{font-size:12px;color:#5a7d96;background:#eff8ff;padding:10px 12px;border-radius:8px}
 .overview-steps{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .overview-steps>div{border:1px solid #cfe5f5;background:#eff8ff;border-radius:10px;padding:26px 18px;text-align:center}
 .overview-steps span{font-size:11px;color:#3885af;font-weight:800}

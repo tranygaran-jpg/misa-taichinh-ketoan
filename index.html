@@ -42,7 +42,7 @@
           <select id="filterYear" class="filter-select" aria-label="Lọc theo năm">
             <option value="2025">Năm 2025</option><option value="2024">Năm 2024</option><option value="2023">Năm 2023</option>
           </select>
-          <span id="yearLogic" class="year-logic" title="Năm chọn xác định tệp khách hàng và tình trạng sở hữu tại ngày 31/12; biểu đồ xu hướng vẫn đối chiếu các năm trên cùng tệp khách đã chọn.">Tệp đến 31/12/2025 · Xu hướng: cùng tệp 2023–2025</span>
+          <button type="button" id="yearLogic" class="year-logic" title="Giải thích bộ lọc năm và cách theo dõi đoàn hệ khách hàng">ⓘ Tệp đến 2025</button>
           <select id="filterSize" class="filter-select" aria-label="Lọc theo quy mô doanh nghiệp">
             <option value="">Tất cả quy mô</option><option>Doanh nghiệp siêu nhỏ</option><option>Doanh nghiệp nhỏ</option>
           </select>
@@ -85,6 +85,16 @@
       </div>
     </div>
     <div class="tooltip" id="tooltip" role="status"></div>
+    <dialog id="yearInfoDialog" class="year-dialog" aria-labelledby="yearInfoTitle">
+      <div class="year-dialog-top"><h2 id="yearInfoTitle">Cách đọc bộ lọc năm</h2><button type="button" id="closeYearInfo" aria-label="Đóng giải thích năm">✕</button></div>
+      <p id="yearInfoSelected">Năm 2025 xác định tệp khách hàng có lịch sử mua và tình trạng sở hữu đến 31/12/2025.</p>
+      <ul>
+        <li><strong>Quy mô tệp và sở hữu sản phẩm:</strong> lũy kế đến ngày 31/12 của năm được chọn.</li>
+        <li><strong>Doanh số và mua bổ sung:</strong> tính theo từng năm giao dịch; kết quả của năm được chọn hiển thị trong KPI.</li>
+        <li><strong>Biểu đồ xu hướng 2023–2025:</strong> đối chiếu các năm trên cùng tệp khách hàng đang được lọc, nên có thể hiển thị những năm sau năm được chọn.</li>
+      </ul>
+      <p class="year-dialog-note">Những chỉ tiêu thuộc các thời điểm khác nhau không được cộng trực tiếp để tạo thành tổng khách hàng.</p>
+    </dialog>
     <dialog id="analysisDialog" class="analysis-dialog" aria-labelledby="analysisTitle">
       <div class="analysis-shell">
         <div class="analysis-topbar">

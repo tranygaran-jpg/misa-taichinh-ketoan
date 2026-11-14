@@ -380,13 +380,14 @@ function updateFilterControls() {
   const entries=activeEntries();
   document.getElementById("activeFilterChips").innerHTML=entries.length?
     entries.map(([key,label])=>`<button class="filter-chip" data-clear="${key}" title="Bỏ điều kiện này">${esc(label)} ×</button>`).join(""):
-    `<span class="filter-idle">Bấm biểu đồ để lọc đồng thời 3 trang</span>`;
+    `<span class="filter-idle">Bấm biểu đồ để lọc chéo</span>`;
   document.getElementById("drillUp").disabled=state.segment==="all";
   document.getElementById("drillDown").disabled=state.segment==="city";
   document.getElementById("drillDown").title=`Drill down theo ${state.segment==="all"?"quy mô":state.segment==="size"?"ngành nghề":"địa bàn"}`;
   const dateChip=document.querySelector(".date-chip");
   dateChip.innerHTML=`<span class="dot"></span> Tệp KH đến 31/12/${f.year}`;
-  document.getElementById("yearLogic").textContent=`Tệp đến 31/12/${f.year} · Xu hướng: cùng tệp 2023–2025`;
+  document.getElementById("yearLogic").textContent=`ⓘ Tệp đến ${f.year}`;
+  document.getElementById("yearInfoSelected").textContent=`Năm ${f.year} xác định tệp khách hàng có lịch sử mua và tình trạng sở hữu đến ngày 31/12/${f.year}.`;
   document.getElementById("filterCountSummary").textContent=`${nf(DATA.dashboard1.totalCustomers)} khách hàng · năm ${f.year}`;
 }
 function resetFilters() {
@@ -645,6 +646,10 @@ document.addEventListener("click",event=>{
   if(chartTarget){if(analysisDialog.open)analysisDialog.close();handleChartFilter(chartTarget.dataset.filter);}
 });
 document.getElementById("overviewBtn").addEventListener("click",()=>openAnalysis("overview"));
+const yearInfoDialog=document.getElementById("yearInfoDialog");
+document.getElementById("yearLogic").addEventListener("click",()=>{hideTooltip();yearInfoDialog.showModal();});
+document.getElementById("closeYearInfo").addEventListener("click",()=>yearInfoDialog.close());
+yearInfoDialog.addEventListener("click",event=>{if(event.target===yearInfoDialog)yearInfoDialog.close();});
 analysisDialog.addEventListener("click",event=>{if(event.target===analysisDialog)analysisDialog.close();});
 document.addEventListener("keydown",event=>{
   if((event.key==="Enter"||event.key===" ")&&event.target.hasAttribute("data-filter")) {
