@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="#eaf3fc">
+    <meta name="description" content="Ba dashboard về cơ cấu khách hàng, trình tự mua và doanh số sản phẩm tài chính - kế toán.">
+    <title>Phân tích bán chéo | MISA Đà Nẵng</title>
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./presentation.css">
+    <link rel="stylesheet" href="./analysis.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="header">
+        <div class="header-primary">
+        <div class="brand">
+          <span class="brand-mark"><span></span><span></span><span></span></span>
+          <div>
+            <div class="brand-main">MISA <span>Analytics</span></div>
+            <div class="brand-sub">Trung tâm Doanh nghiệp nhỏ · Đà Nẵng</div>
+          </div>
+        </div>
+        <nav class="tabs" aria-label="Chọn Dashboard">
+          <button class="tab active" data-view="1"><span class="tab-num">01</span><span>Cơ cấu sản phẩm</span></button>
+          <button class="tab" data-view="2"><span class="tab-num">02</span><span>Hành vi mua</span></button>
+          <button class="tab" data-view="3"><span class="tab-num">03</span><span>Doanh số &amp; cơ hội</span></button>
+        </nav>
+        <div class="header-actions">
+          <button class="overview-button" id="overviewBtn" title="Phân tích tổng hợp ba dashboard">◈ Phân tích tổng hợp</button>
+          <div class="date-chip"><span class="dot"></span> Dữ liệu đến 31/12/2025</div>
+          <button class="icon-button" id="printBtn" aria-label="In hoặc lưu Dashboard thành PDF" title="In / lưu PDF">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M7 9V3h10v6M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><path d="M7 14h10v7H7zM17 12h1"/></svg>
+          </button>
+          <button class="icon-button" id="fullBtn" aria-label="Trình chiếu toàn màn hình" title="Trình chiếu toàn màn hình">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5"/></svg>
+          </button>
+        </div>
+        </div>
+        <div class="filter-ribbon" aria-label="Bộ lọc chung cho ba dashboard">
+          <span class="filter-title">LỌC LIÊN KẾT</span>
+          <select id="filterYear" class="filter-select" aria-label="Lọc theo năm">
+            <option value="2025">Năm 2025</option><option value="2024">Năm 2024</option><option value="2023">Năm 2023</option>
+          </select>
+          <select id="filterSize" class="filter-select" aria-label="Lọc theo quy mô doanh nghiệp">
+            <option value="">Tất cả quy mô</option><option>Doanh nghiệp siêu nhỏ</option><option>Doanh nghiệp nhỏ</option>
+          </select>
+          <select id="filterIndustry" class="filter-select" aria-label="Lọc theo ngành nghề">
+            <option value="">Tất cả ngành</option><option>Thương mại - bán lẻ</option><option>Dịch vụ - du lịch</option>
+            <option>Xây dựng - lắp đặt</option><option>Sản xuất</option><option>Ngành nghề khác</option>
+          </select>
+          <select id="filterCity" class="filter-select" aria-label="Lọc theo địa bàn">
+            <option value="">Tất cả địa bàn</option><option>TP. Đà Nẵng</option><option>TP. Huế</option>
+            <option>Quảng Ngãi</option><option>Quảng Trị</option>
+          </select>
+          <select id="filterProduct" class="filter-select" aria-label="Lọc theo sản phẩm sở hữu">
+            <option value="">Tất cả sản phẩm</option><option value="A">A · AMIS Kế toán</option><option value="B">B · meInvoice</option>
+            <option value="C">C · eSign</option><option value="D">D · mTax</option><option value="E">E · JetPay BankHub</option>
+          </select>
+          <select id="filterCount" class="filter-select" aria-label="Lọc theo số sản phẩm đã mua">
+            <option value="">Số SP: Tất cả</option><option value="1">1 sản phẩm</option><option value="2">2 sản phẩm</option><option value="2+">Từ 2 SP</option><option value="3+">Từ 3 SP</option>
+          </select>
+          <div id="activeFilterChips" class="active-filter-chips" aria-live="polite">Bấm vào biểu đồ để lọc</div>
+          <button class="filter-button" id="drillUp" title="Drill up: trở lại nhóm rộng hơn" aria-label="Drill up">↑ Nhóm</button>
+          <button class="filter-button" id="drillDown" title="Drill down: đi sâu theo quy mô, ngành và địa bàn" aria-label="Drill down">↓ Chi tiết</button>
+          <button class="filter-reset" id="resetFilters" title="Xóa tất cả bộ lọc">↺ Xóa lọc</button>
+        </div>
+      </header>
+      <div class="stage-slot" id="stageSlot">
+      <main class="main" id="presentationStage">
+        <div class="intro">
+          <div>
+            <p class="eyebrow">PHÂN TÍCH KHÁCH HÀNG VÀ BÁN CHÉO</p>
+            <h1 id="pageTitle">DASHBOARD 1 – Cơ cấu khách hàng theo sản phẩm và tổ hợp mua</h1>
+            <p class="intro-sub" id="pageDescription">Chọn một cột, lát biểu đồ hoặc ô ma trận để xem các biểu đồ liên kết.</p>
+          </div>
+          <div class="page-indicator" aria-hidden="true"><span id="pageNumber">01</span><span class="page-divider">/</span><span>03</span></div>
+        </div>
+        <div id="dashboard" aria-live="polite">
+          <div class="loading">Đang tổng hợp dữ liệu...</div>
+        </div>
+        <div class="bottom-line"><span id="slideFilterSummary">Nguồn: Bộ dữ liệu nghiên cứu; không phải báo cáo chính thức do MISA phát hành.</span><span id="filterCountSummary">Tệp phân tích · 2025</span></div>
+      </main>
+      </div>
+    </div>
+    <div class="tooltip" id="tooltip" role="status"></div>
+    <dialog id="analysisDialog" class="analysis-dialog" aria-labelledby="analysisTitle">
+      <div class="analysis-shell">
+        <div class="analysis-topbar">
+          <div><p class="analysis-eyebrow" id="analysisEyebrow">PHÂN TÍCH CHI TIẾT</p><h2 id="analysisTitle"></h2><p id="analysisContext"></p></div>
+          <button type="button" class="analysis-close" id="closeAnalysis" aria-label="Đóng cửa sổ phân tích">✕</button>
+        </div>
+        <p class="analysis-lead" id="analysisLead"></p>
+        <div class="analysis-columns">
+          <div class="analysis-primary">
+            <div class="analysis-plot" id="analysisPreview"></div>
+            <div class="analysis-table-wrap"><h3>Số liệu &amp; đối chiếu</h3><div id="analysisRows"></div></div>
+          </div>
+          <aside class="analysis-secondary">
+            <div class="analysis-interpret"><h3>Ý nghĩa đối với bán chéo</h3><p id="analysisTakeaway"></p></div>
+            <div class="analysis-definition"><h3>Cách đọc &amp; mẫu số</h3><p id="analysisDefinition"></p></div>
+            <div class="analysis-shortcuts"><h3>Khám phá nhanh</h3>
+              <div class="analysis-actions">
+                <button type="button" data-focus="a-only">Chỉ mua AMIS Kế toán</button>
+                <button type="button" data-focus="a-missing-b">Có A, chưa mua meInvoice</button>
+                <button type="button" data-focus="multi">Khách đa sản phẩm</button>
+              </div>
+              <small>Giữ lại bộ lọc năm và phân khúc. Chọn một nhóm để cập nhật đồng thời cả ba dashboard.</small>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </dialog>
+    <script src="./crossfilter.js" defer></script>
+    <script src="./app.js" defer></script>
+  </body>
+</html>

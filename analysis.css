@@ -1,0 +1,133 @@
+/* Denser 16:9 presentation and drill-through analysis panels. */
+.overview-button{border:1px solid #b9dcef;border-radius:8px;background:#e9f6ff;color:#126aab;
+  padding:8px 12px;font-size:11px;font-weight:800;white-space:nowrap}
+.overview-button:hover{background:#d4ecfc}
+.intro{height:74px;min-height:74px}
+.intro-sub{font-size:17px;color:#44769c;font-weight:700}
+#dashboard{height:912px;margin-top:16px}
+.kpis{height:117px;margin-bottom:17px;gap:17px}
+.kpi{height:117px;padding:16px 23px 12px}
+.kpi-value{margin-top:9px}
+.chart-grid{height:778px;gap:13px}
+.chart-grid.behavior{grid-template-rows:394px 371px}
+.chart-grid.revenue{grid-template-rows:364px 401px}
+.card{padding:14px 16px 11px}
+.card-head{min-height:53px;gap:8px;align-items:flex-start}
+.card-heading{flex:1;min-width:0}
+.card-title{font-size:19px;line-height:1.28}
+.card-sub{margin-top:3px;font-size:12.5px;line-height:1.38}
+.card-body{margin-top:1px}
+.chart-controls{gap:7px}
+.detail-button{border:1px solid #d2e7f3;border-radius:7px;background:#f0f8fd;color:#1973a8;
+  font-size:11px;line-height:1.1;font-weight:800;padding:7px 10px;white-space:nowrap;flex:none}
+.detail-button:hover{background:#d7edf9;border-color:#91c8e8}
+.select{font-size:11px;max-width:159px;min-width:120px;padding:7px 10px}
+.horizontal-bars{padding:16px 10px 0}
+.hbar-row{grid-template-columns:205px 1fr 120px;margin-bottom:19px;gap:13px}
+.hbar-label{font-size:16px}.hbar-label small{font-size:11px;margin-top:5px}
+.hbar-track{height:23px}.hbar-value{font-size:18px}.hbar-value small{font-size:13px}
+.donut-layout{padding:0 10px;gap:24px}
+.donut-wrap{height:284px;width:284px;flex:0 0 284px}
+.donut-legend{gap:23px}
+.donut-legend .legend-label{font-size:16px}.donut-legend .legend-value{font-size:19px}
+.chart-grid.revenue .chart-heat .card-body{display:flex;flex-direction:column;justify-content:stretch}
+.chart-grid.revenue .heatmap{flex:1;height:calc(100% - 25px);margin:0}
+.heatmap td{font-size:15px;padding:7px 3px}
+.heatmap th{font-size:13px}
+.heat-foot{margin:5px 3px 0}
+.upset-scroll{padding:0}
+.bottom-line{bottom:8px}
+
+.analysis-dialog{width:min(1380px,calc(100vw - 34px));max-width:1380px;max-height:calc(100dvh - 38px);
+  padding:0;border:1px solid #c6dfec;border-radius:17px;overflow:auto;color:#19486f;
+  background:#f5faff;box-shadow:0 30px 110px rgba(14,51,89,.35);font-family:'Be Vietnam Pro',Arial,sans-serif}
+.analysis-dialog::backdrop{background:rgba(7,37,69,.58);backdrop-filter:blur(5px)}
+.analysis-shell{padding:25px 30px 26px}
+.analysis-topbar{display:flex;align-items:flex-start;gap:25px;justify-content:space-between;border-bottom:1px solid #d7e8f4;padding-bottom:18px}
+.analysis-eyebrow{font-size:10.5px;font-weight:800;color:#1687c5;letter-spacing:.11em;margin:0 0 8px}
+.analysis-topbar h2{font-size:26px;color:#164c81;line-height:1.32;margin:0 0 6px}
+.analysis-topbar p:last-child{font-size:12px;color:#6b8ba6;margin:0}
+.analysis-close{width:39px;height:39px;flex:none;border:1px solid #d2e4f0;border-radius:9px;
+  background:#fff;color:#1d6798;font-size:19px;font-weight:800}
+.analysis-close:hover{background:#e2f2fb}
+.analysis-lead{font-size:16px;font-weight:700;line-height:1.65;color:#245d88;margin:16px 0 20px;
+  background:#e7f4fe;border-left:4px solid #1688ca;padding:13px 16px;border-radius:8px}
+.analysis-columns{display:grid;grid-template-columns:minmax(0,1.9fr) minmax(285px,1fr);gap:22px}
+.analysis-primary,.analysis-secondary{min-width:0}
+.analysis-plot{height:345px;padding:20px 18px;background:#fff;border:1px solid #d9e8f3;border-radius:12px;
+  overflow:auto;display:flex;align-items:center;justify-content:center}
+.analysis-plot>svg{height:100%;width:100%;max-width:100%}
+.analysis-plot>.horizontal-bars{width:100%;padding:0 10px}
+.analysis-plot .hbar-row{margin-bottom:18px;grid-template-columns:190px 1fr 100px}
+.analysis-plot .donut-wrap{width:290px;height:290px;flex-basis:290px}
+.analysis-plot>.upset-scroll{width:100%;height:100%}
+.analysis-plot>.donut-layout{width:100%}
+.analysis-plot>.heatmap{height:100%;width:100%}
+.analysis-plot:has(>.heatmap){display:block}
+.analysis-plot .heatmap th{font-size:11px}
+.analysis-plot .heatmap td{font-size:12px}
+.analysis-plot .heatmap .seg-label{font-size:11px}
+.analysis-plot .heatmap .cell-n{font-size:9px}
+.analysis-table-wrap{margin-top:18px;border:1px solid #d9e8f3;border-radius:12px;background:#fff;padding:16px 18px}
+.analysis-table-wrap h3,.analysis-secondary h3{font-size:14px;color:#185386;margin:0 0 13px}
+.analysis-table{width:100%;border-collapse:collapse;font-size:12px;line-height:1.5}
+.analysis-table th{background:#f0f8fd;color:#5880a1;text-align:left;font-size:11px;padding:9px 10px}
+.analysis-table td{padding:10px 10px;border-top:1px solid #e6eff5;color:#365d7b}
+.analysis-table td:nth-child(2){white-space:nowrap;font-weight:800;color:#11568e}
+.analysis-table th:last-child,.analysis-table td:last-child{text-align:right}
+.analysis-secondary>div{background:#fff;border:1px solid #d9e8f3;border-radius:12px;padding:19px;margin-bottom:15px}
+.analysis-secondary p{font-size:12.5px;line-height:1.8;color:#4e6d85;margin:0}
+.analysis-secondary .analysis-interpret{background:#e7f4fe;border-color:#c1e4f8}
+.analysis-secondary .analysis-interpret p{color:#245a80;font-weight:600}
+.analysis-actions{display:grid;gap:8px;margin:10px 0}
+.analysis-actions button{text-align:left;background:#eef8fe;color:#196b9d;border:1px solid #d3e8f5;
+  border-radius:7px;padding:11px 13px;font-size:11px;font-weight:800}
+.analysis-actions button:hover{background:#d7effd;border-color:#83c5e9}
+.analysis-shortcuts small{display:block;font-size:10px;line-height:1.6;color:#8a9eae}
+.overview-steps{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.overview-steps>div{border:1px solid #cfe5f5;background:#eff8ff;border-radius:10px;padding:26px 18px;text-align:center}
+.overview-steps span{font-size:11px;color:#3885af;font-weight:800}
+.overview-steps strong{display:block;font-size:28px;color:#155a91;margin:18px 0 7px}
+.overview-steps p{font-size:11px;line-height:1.6;color:#6085a0;margin:0}
+body.compact .overview-button{padding:6px 8px;font-size:9px}
+body.compact .intro{height:auto;min-height:55px}
+body.compact #dashboard{height:auto;margin-top:16px}
+body.compact .kpis{height:auto;gap:10px;margin-bottom:15px}
+body.compact .kpi{height:110px;padding:12px}
+body.compact .chart-grid,body.compact .chart-grid.behavior,body.compact .chart-grid.revenue{height:auto;grid-template-rows:none;gap:12px}
+body.compact .chart-grid .card{padding:12px}
+body.compact .card-title{font-size:13px}
+body.compact .card-sub{font-size:10px}
+body.compact .detail-button{font-size:9px;padding:6px}
+body.compact .hbar-row{grid-template-columns:112px 1fr 70px;gap:7px;margin-bottom:18px}
+body.compact .hbar-label{font-size:10px}
+body.compact .hbar-track{height:15px}
+body.compact .hbar-value{font-size:11px}
+body.compact .donut-wrap{height:165px;width:165px;flex-basis:165px}
+body.compact .donut-legend .legend-label{font-size:9px}
+body.compact .chart-grid.revenue .heatmap{height:auto}
+@media(max-width:850px){
+  .analysis-shell{padding:16px}
+  .analysis-topbar h2{font-size:19px}
+  .analysis-columns{grid-template-columns:1fr}
+  .analysis-plot{height:310px;padding:12px}
+  .analysis-table{font-size:10px}
+  .analysis-plot .donut-wrap{height:180px;width:180px;flex-basis:180px}
+  .analysis-plot .donut-legend{gap:8px}
+  .analysis-plot .hbar-row{grid-template-columns:90px 1fr 60px}
+  .analysis-plot .hbar-label{font-size:10px}
+  .analysis-plot .hbar-value{font-size:11px}
+  .analysis-lead{font-size:12px}
+  .overview-steps{gap:5px}.overview-steps>div{padding:12px 4px}
+  .overview-steps strong{font-size:20px}
+}
+@media print{
+  .overview-button,.detail-button,.analysis-dialog{display:none!important}
+  .intro{height:74px!important}
+  #dashboard{height:912px!important;margin-top:16px!important}
+  .kpis{height:117px!important;margin-bottom:17px!important}
+  .kpi{height:117px!important;padding:16px 23px 12px!important}
+  .chart-grid{height:778px!important;gap:13px!important}
+  .chart-grid.behavior{grid-template-rows:394px 371px!important}
+  .chart-grid.revenue{grid-template-rows:364px 401px!important}
+}

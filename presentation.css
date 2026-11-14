@@ -1,0 +1,202 @@
+/* Presentation layout: a true, resolution-independent 1920 × 1080 slide. */
+:root {
+  --navy: #174879;
+  --navy2: #155a97;
+  --blue: #087bc7;
+  --blue-light: #77b8e6;
+  --ice: #e5f3fc;
+  --orange: #f3a17e;
+  --orange-light: #fbe3d8;
+  --bg: #eaf3fb;
+  --line: #cddfed;
+  --muted: #62768b;
+  --text: #163f70;
+  --shadow: none;
+}
+html,body{width:100%;min-height:100%;overflow-x:hidden}
+body{background:#dae9f7;color:#153e6d;font-family:'Be Vietnam Pro',Arial,sans-serif}
+.app-shell{min-height:100vh;display:flex;flex-direction:column}
+.header{flex:0 0 105px;height:105px;min-height:105px;padding:0 18px;background:#fff;
+  box-shadow:0 1px 10px rgba(23,80,130,.08);border-bottom:1px solid #dcebf6;gap:0;z-index:5;
+  display:flex;flex-direction:column}
+.header-primary{display:flex;align-items:center;justify-content:space-between;gap:22px;width:100%;height:56px;flex:0 0 56px}
+.filter-ribbon{width:100%;height:49px;display:flex;align-items:center;gap:7px;overflow-x:auto;
+  border-top:1px solid #e6eff7;scrollbar-width:thin;white-space:nowrap}
+.filter-title{font-size:10px;font-weight:800;color:#1580b6;letter-spacing:.07em;flex:none}
+.filter-select{font-size:10px;color:#235e86;border:1px solid #cddfed;background:#f5faff;
+  padding:7px 8px;border-radius:6px;flex:0 0 auto;max-width:159px;min-width:95px;cursor:pointer}
+#filterIndustry{max-width:159px}#filterSize{max-width:155px}
+.filter-button,.filter-reset{font-size:10px;font-weight:800;padding:8px 11px;background:#edf6fc;border:1px solid #cee4f2;
+  color:#2178a9;border-radius:7px;white-space:nowrap;flex:none}
+.filter-button:disabled{opacity:.4;cursor:default}
+.filter-reset{background:#e9f7f5;color:#1c7c7e;border-color:#c1e1dc}
+.active-filter-chips{display:flex;gap:4px;align-items:center;flex:0 0 auto;color:#7898b0;font-size:10px}
+.filter-chip{background:#e4f0fa;color:#245f88;border:1px solid #a8d3ed;padding:5px 7px;border-radius:9px;font-size:10px}
+.filter-chip:hover{background:#cae4f6}
+.brand{flex:0 0 auto;gap:10px}
+.brand-mark{height:34px;width:34px;background:linear-gradient(145deg,#006bb2,#10a9d6);border-radius:9px}
+.brand-main{color:#0872b6;font-size:16px}
+.brand-main span{color:#658eaa}
+.brand-sub{font-size:9px;color:#7993a9;margin-top:1px}
+.tabs{margin:0;border:0;display:flex;flex:1;justify-content:center;align-items:center;gap:5px;min-width:0}
+.tab{border:1px solid transparent;border-radius:8px!important;padding:8px 16px!important;margin:0;
+  font-size:11px;color:#607d9b;background:transparent;white-space:nowrap;line-height:1.2}
+.tab.active{background:#e7f3fd;color:#076baa;border-color:#c8e3f8;border-bottom-color:#c8e3f8}
+.tab:hover{background:#edf6fd;color:#0066ac}
+.header-actions{gap:8px;flex:0 0 auto}
+.date-chip{padding:8px 10px;background:#f5faff;color:#5482a4;border-color:#d9eaf6;font-size:10px}
+.dot{background:#15a7ab}
+.icon-button{height:32px;width:32px;color:#417fac;border:1px solid #dceaf4}
+.icon-button:hover{background:#e8f6fd}
+.stage-slot{margin:10px auto 12px;flex:0 0 auto;position:relative;max-width:none}
+.stage-slot:fullscreen{display:grid;place-items:center;background:#e5f1fa;margin:0}
+.main{
+  width:1920px;height:1080px;max-width:none;margin:0;padding:42px 55px 34px;
+  background:#eef4fa;position:absolute;top:0;left:0;transform-origin:top left;
+  border:1px solid #dceaf4;box-shadow:0 10px 35px #1b4d7820;overflow:hidden
+}
+.intro{height:80px;min-height:80px;align-items:center;justify-content:center;
+  border-left:12px solid #12a3c4;padding-left:25px;gap:0}
+.intro>div:first-child{min-width:0;width:100%;text-align:center}
+.eyebrow,.page-indicator{display:none}
+.intro-sub{display:block;margin:5px 0 0;font-size:15px;color:#5f86a6;font-weight:600;letter-spacing:0;line-height:1.3}
+h1{font-size:36px;line-height:1.21;font-weight:800;letter-spacing:-.6px;
+  color:#154b82;text-transform:uppercase;white-space:nowrap;margin:0}
+#dashboard{height:906px;margin-top:19px}
+.kpis{height:124px;margin-bottom:23px;gap:24px;grid-template-columns:repeat(4,minmax(0,1fr))}
+.kpi{min-height:0;height:124px;padding:20px 26px 14px;border:1.5px solid #cbddec;border-left:6px solid #1481c7;
+  border-radius:12px;background:#fff;box-shadow:none}
+.kpi::before{display:none}
+.kpi.featured,.kpi.orange{border-left-color:#1481c7}
+.kpi-label{font-size:16px;font-weight:500;color:#667687;line-height:1.4;white-space:nowrap}
+.kpi-value{margin-top:12px;font-size:40px;line-height:1.18;font-weight:800;
+  letter-spacing:-.6px;color:#184a80}
+.kpi-value .unit{font-size:25px;font-weight:800;color:#184a80;margin-left:8px;letter-spacing:-.4px}
+.kpi-foot{font-size:10px;margin-top:1px;color:#9aafc1}
+.chart-grid{height:759px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  grid-template-rows:repeat(2,minmax(0,1fr));gap:18px}
+.chart-grid.behavior{grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);
+  grid-template-rows:381px 360px}
+.chart-grid.revenue{grid-template-rows:353px 388px}
+.card{height:auto!important;min-height:0;min-width:0;padding:17px 19px 12px;
+  background:#fff;border:1.5px solid #d3e2ee;border-radius:12px;box-shadow:none}
+.card-head{min-height:60px;gap:10px}
+.card-title{font-size:19px;line-height:1.35;letter-spacing:-.3px;color:#165185;font-weight:800}
+.card-sub{font-size:13px;line-height:1.5;margin-top:5px;color:#6f8192}
+.card-body{margin-top:2px;min-height:0;overflow:hidden}
+.select{font-size:13px;max-width:190px;min-width:135px;padding:8px 13px;
+  background:#f2f9fe;color:#2f78a7;border:1px solid #cde5f4;border-radius:7px}
+.horizontal-bars{padding:10px 13px 0}
+.hbar-row{grid-template-columns:208px 1fr 122px;gap:12px;margin-bottom:12px}
+.hbar-label{font-size:15px;color:#35658a;font-weight:700}
+.hbar-label small{font-size:11px;margin-top:4px;color:#8aa4ba}
+.hbar-track{height:19px;background:#e6f3fb;border-radius:3px}
+.hbar-fill{border-radius:3px;background:linear-gradient(90deg,#0875bc,#2796d6)!important}
+.hbar-row:nth-child(2) .hbar-fill{background:linear-gradient(90deg,#147dc1,#5aabd9)!important}
+.hbar-row:nth-child(3) .hbar-fill{background:linear-gradient(90deg,#4b9acc,#86bfdf)!important}
+.hbar-row:nth-child(4) .hbar-fill,.hbar-row:nth-child(5) .hbar-fill{background:#91c8e9!important}
+.hbar-value{font-size:16px;color:#155486}
+.hbar-value small{font-size:12px;margin-top:1px}
+.donut-layout{gap:30px;padding:8px 20px 6px}
+.donut-wrap{height:256px;width:256px;flex:0 0 256px}
+.donut-legend{min-width:230px;gap:20px}
+.donut-legend .item{grid-template-columns:14px 1fr 63px;gap:9px}
+.donut-legend .legend-label{font-size:15px;color:#476b89}
+.donut-legend .legend-value{font-size:19px;color:#1d5283}
+.donut-legend .legend-pct{font-size:13px;margin-top:3px;color:#7b9ab1}
+.swatch{height:11px;width:11px;border-radius:2px}
+.upset-scroll{padding:0;scrollbar-color:#a2c7e0 transparent}
+.upset-scroll svg{height:100%}
+.heatmap{border-spacing:4px 4px;table-layout:fixed}
+.heatmap th{font-size:13px;padding:2px 0 6px;color:#315e82}
+.heatmap th:first-child{width:37%}
+.heatmap td{font-size:14px;padding:7px 2px;border-radius:3px}
+.heatmap .seg-label{font-size:13px;line-height:1.3;color:#365d7d;padding:4px 4px 4px 0}
+.seg-n{display:inline;color:#7e9bb2;font-size:11px;font-weight:500;margin:0 0 0 4px}
+.heatmap .cell-n{display:inline;font-size:11px;opacity:.85;font-weight:700;margin:0 0 0 4px}
+.heat-foot{font-size:11px;margin:8px 3px 0}
+.heat-gradient{background:linear-gradient(90deg,#e4f6fd,#a4d4ec,#4b9ed2,#0876b8,#0a4e90)}
+.svg-label{fill:#355f84}.svg-value{fill:#17558c}.svg-small{fill:#547d9c}
+.svg-tick{fill:#6388a3}
+.grid-line{stroke:#e5eff8}
+.bottom-line{position:absolute;bottom:9px;left:55px;right:55px;padding:0;color:#94b0c4;font-size:11px}
+.chart-clickable,[data-filter]{cursor:pointer}
+.chart-clickable:hover,[data-filter]:hover{filter:brightness(1.08);opacity:.84}
+.hbar-row[data-filter]:hover .hbar-track{outline:2px solid #66b9de}
+.heatmap td[data-filter],.heatmap td.seg-label[data-filter]{transition:box-shadow .15s,opacity .15s}
+.heatmap td[data-filter]:hover{box-shadow:0 0 0 2px #1099c7 inset}
+.selection-active{outline:2px solid #f1a068;outline-offset:1px}
+.donut-legend .item[data-filter]:hover{background:#f2f9fc;border-radius:7px}
+.chart-hint{font-size:11px;color:#6497b7;margin-top:3px}
+.no-data{font-size:20px;color:#87a5b9;display:grid;place-items:center;height:100%}
+.source-dialog{font-family:'Be Vietnam Pro',Arial,sans-serif}
+body.compact .stage-slot{width:100%!important;height:auto!important;margin:0}
+body.compact .main{position:relative;width:100%!important;height:auto!important;padding:20px 14px 32px;
+  transform:none!important;overflow:visible;border:none}
+body.compact .header{height:96px;min-height:96px;flex-basis:96px;padding:0 8px}
+body.compact .header-primary{height:49px;flex-basis:49px}
+body.compact .filter-ribbon{height:47px}
+body.compact .filter-select{font-size:9px;max-width:125px}
+body.compact .intro{height:auto;min-height:55px;border-left-width:6px;padding-left:14px}
+body.compact h1{font-size:21px;white-space:normal}
+body.compact .intro-sub{font-size:10px;line-height:1.6}
+body.compact #dashboard{height:auto;margin-top:20px}
+body.compact .kpis{height:auto;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:16px}
+body.compact .kpi{height:110px;padding:12px;border-left-width:4px}
+body.compact .kpi-label{font-size:11px;white-space:normal}
+body.compact .kpi-value{font-size:23px;margin-top:7px}
+body.compact .kpi-value .unit{font-size:13px;margin-left:3px}
+body.compact .chart-grid,body.compact .chart-grid.behavior,body.compact .chart-grid.revenue{
+  display:grid;height:auto;grid-template-columns:1fr;grid-template-rows:none;gap:12px}
+body.compact .chart-grid .card{grid-column:auto;height:365px!important;padding:12px}
+body.compact .chart-grid .card.wide{height:305px!important}
+body.compact .card-title{font-size:14px}
+body.compact .card-sub{font-size:10px}
+body.compact .card-head{min-height:44px}
+body.compact .horizontal-bars{padding:0}
+body.compact .hbar-row{grid-template-columns:112px 1fr 70px;gap:7px;margin-bottom:18px}
+body.compact .hbar-label{font-size:10px}
+body.compact .hbar-label small{font-size:9px}
+body.compact .hbar-track{height:15px}
+body.compact .hbar-value{font-size:11px}
+body.compact .hbar-value small{font-size:9px}
+body.compact .donut-layout{gap:4px;padding:0}
+body.compact .donut-wrap{width:165px;height:165px;flex-basis:165px}
+body.compact .donut-legend{min-width:105px;gap:10px}
+body.compact .donut-legend .item{grid-template-columns:8px 1fr auto;gap:5px}
+body.compact .donut-legend .legend-label{font-size:9px}
+body.compact .donut-legend .legend-value{font-size:10px}
+body.compact .donut-legend .legend-pct{font-size:9px}
+body.compact .heatmap th{font-size:9px}
+body.compact .heatmap td{font-size:10px;padding:7px 2px}
+body.compact .heatmap .seg-label{font-size:9px}
+body.compact .seg-n{font-size:8px}
+body.compact .heatmap .cell-n{font-size:8px}
+body.compact .heat-foot{font-size:8px}
+body.compact .select{min-width:0;max-width:110px;font-size:10px;padding:6px}
+body.compact .bottom-line{position:static;margin-top:20px;font-size:8px}
+body.compact .header{padding:0 10px;gap:4px}
+body.compact .brand{display:none}
+body.compact .header-actions{gap:4px}
+body.compact .date-chip{display:none}
+body.compact .tabs{justify-content:flex-start;overflow-x:auto}
+body.compact .tab{font-size:9px;padding:7px!important;gap:3px}
+@media print{
+  @page{size:20in 11.25in;margin:0}
+  html,body{width:1920px;height:1080px;overflow:hidden;background:#fff}
+  .header{display:none!important}
+  .stage-slot{width:1920px!important;height:1080px!important;margin:0!important}
+  .main{transform:none!important;position:relative!important;box-shadow:none!important;
+    width:1920px!important;height:1080px!important;border:0}
+  .intro{display:flex!important;margin-bottom:0!important}
+  .kpis{height:124px;gap:24px;margin-bottom:23px}
+  .kpi{height:124px;padding:20px 26px 14px}
+  .kpi-value{font-size:40px;margin-top:12px}.kpi-foot{display:block}
+  .card.chart-half,.card.chart-large,.card.chart-heat,.card.chart-butterfly,.card.chart-wide{
+    height:auto!important}
+  .card{padding:17px 19px 12px}
+  .card-title{font-size:19px}.card-sub{font-size:13px}
+  .chart-grid.behavior{grid-template-columns:1.45fr 1fr}
+  .donut-wrap{height:256px;width:256px;flex-basis:256px}
+  .bottom-line{display:flex!important}
+}
