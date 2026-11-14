@@ -2,6 +2,8 @@
 .overview-button{border:1px solid #b9dcef;border-radius:8px;background:#e9f6ff;color:#126aab;
   padding:8px 12px;font-size:11px;font-weight:800;white-space:nowrap}
 .overview-button:hover{background:#d4ecfc}
+.year-logic{font-size:10px;line-height:1.3;color:#376d91;background:#eff8ff;border:1px solid #cde5f3;
+  padding:7px 9px;border-radius:6px;white-space:nowrap;flex:none;font-weight:700}
 .intro{height:74px;min-height:74px}
 .intro-sub{font-size:17px;color:#44769c;font-weight:700}
 #dashboard{height:912px;margin-top:16px}
@@ -32,30 +34,41 @@
 .donut-legend .legend-label{font-size:16px}.donut-legend .legend-value{font-size:19px}
 .chart-grid.revenue .chart-heat .card-body{display:flex;flex-direction:column;justify-content:stretch}
 .chart-grid.revenue .heatmap{flex:1;height:calc(100% - 25px);margin:0}
+.chart-grid.revenue .heatmap th:first-child{width:34%}
+.chart-grid.revenue .heatmap .seg-label{font-size:12px;line-height:1.15;padding:3px 4px}
+.chart-grid.revenue .heatmap td{font-size:13px;padding:4px 2px}
+.chart-grid.revenue .heatmap .cell-n{font-size:10px}
+.heatmap .small-sample{color:#b76c20;font-weight:800}
+.heatmap .small-sample .seg-n{color:#a75e1e}
 .heatmap td{font-size:15px;padding:7px 3px}
 .heatmap th{font-size:13px}
 .heat-foot{margin:5px 3px 0}
 .upset-scroll{padding:0}
-.bottom-line{bottom:8px}
+.bottom-line{bottom:8px;font-size:14px;color:#64869e}
 
 .analysis-dialog{width:min(1380px,calc(100vw - 34px));max-width:1380px;max-height:calc(100dvh - 38px);
   padding:0;border:1px solid #c6dfec;border-radius:17px;overflow:auto;color:#19486f;
   background:#f5faff;box-shadow:0 30px 110px rgba(14,51,89,.35);font-family:'Be Vietnam Pro',Arial,sans-serif}
 .analysis-dialog::backdrop{background:rgba(7,37,69,.58);backdrop-filter:blur(5px)}
-.analysis-shell{padding:25px 30px 26px}
-.analysis-topbar{display:flex;align-items:flex-start;gap:25px;justify-content:space-between;border-bottom:1px solid #d7e8f4;padding-bottom:18px}
+.analysis-shell{padding:20px 25px 20px}
+.analysis-topbar{display:flex;align-items:flex-start;gap:25px;justify-content:space-between;border-bottom:1px solid #d7e8f4;padding-bottom:12px}
 .analysis-eyebrow{font-size:10.5px;font-weight:800;color:#1687c5;letter-spacing:.11em;margin:0 0 8px}
 .analysis-topbar h2{font-size:26px;color:#164c81;line-height:1.32;margin:0 0 6px}
 .analysis-topbar p:last-child{font-size:12px;color:#6b8ba6;margin:0}
 .analysis-close{width:39px;height:39px;flex:none;border:1px solid #d2e4f0;border-radius:9px;
   background:#fff;color:#1d6798;font-size:19px;font-weight:800}
 .analysis-close:hover{background:#e2f2fb}
-.analysis-lead{font-size:16px;font-weight:700;line-height:1.65;color:#245d88;margin:16px 0 20px;
-  background:#e7f4fe;border-left:4px solid #1688ca;padding:13px 16px;border-radius:8px}
-.analysis-columns{display:grid;grid-template-columns:minmax(0,1.9fr) minmax(285px,1fr);gap:22px}
+.analysis-lead{font-size:15px;font-weight:700;line-height:1.55;color:#245d88;margin:13px 0 14px;
+  background:#e7f4fe;border-left:4px solid #1688ca;padding:11px 14px;border-radius:8px}
+.analysis-columns{display:grid;grid-template-columns:minmax(0,1.9fr) minmax(285px,1fr);gap:16px}
 .analysis-primary,.analysis-secondary{min-width:0}
-.analysis-plot{height:345px;padding:20px 18px;background:#fff;border:1px solid #d9e8f3;border-radius:12px;
+.analysis-plot{height:306px;padding:12px 14px;background:#fff;border:1px solid #d9e8f3;border-radius:12px;
   overflow:auto;display:flex;align-items:center;justify-content:center}
+.analysis-plot:has(>.overview-steps){height:196px}
+.analysis-plot:has(>.donut-layout){height:306px}
+.analysis-plot:has(>.horizontal-bars){height:320px}
+.analysis-plot:has(>.heatmap){height:340px}
+.analysis-plot:has(>.upset-scroll){height:315px}
 .analysis-plot>svg{height:100%;width:100%;max-width:100%}
 .analysis-plot>.horizontal-bars{width:100%;padding:0 10px}
 .analysis-plot .hbar-row{margin-bottom:18px;grid-template-columns:190px 1fr 100px}
@@ -68,14 +81,14 @@
 .analysis-plot .heatmap td{font-size:12px}
 .analysis-plot .heatmap .seg-label{font-size:11px}
 .analysis-plot .heatmap .cell-n{font-size:9px}
-.analysis-table-wrap{margin-top:18px;border:1px solid #d9e8f3;border-radius:12px;background:#fff;padding:16px 18px}
+.analysis-table-wrap{margin-top:12px;border:1px solid #d9e8f3;border-radius:12px;background:#fff;padding:13px 15px}
 .analysis-table-wrap h3,.analysis-secondary h3{font-size:14px;color:#185386;margin:0 0 13px}
 .analysis-table{width:100%;border-collapse:collapse;font-size:12px;line-height:1.5}
 .analysis-table th{background:#f0f8fd;color:#5880a1;text-align:left;font-size:11px;padding:9px 10px}
 .analysis-table td{padding:10px 10px;border-top:1px solid #e6eff5;color:#365d7b}
 .analysis-table td:nth-child(2){white-space:nowrap;font-weight:800;color:#11568e}
 .analysis-table th:last-child,.analysis-table td:last-child{text-align:right}
-.analysis-secondary>div{background:#fff;border:1px solid #d9e8f3;border-radius:12px;padding:19px;margin-bottom:15px}
+.analysis-secondary>div{background:#fff;border:1px solid #d9e8f3;border-radius:12px;padding:15px;margin-bottom:11px}
 .analysis-secondary p{font-size:12.5px;line-height:1.8;color:#4e6d85;margin:0}
 .analysis-secondary .analysis-interpret{background:#e7f4fe;border-color:#c1e4f8}
 .analysis-secondary .analysis-interpret p{color:#245a80;font-weight:600}
@@ -90,6 +103,7 @@
 .overview-steps strong{display:block;font-size:28px;color:#155a91;margin:18px 0 7px}
 .overview-steps p{font-size:11px;line-height:1.6;color:#6085a0;margin:0}
 body.compact .overview-button{padding:6px 8px;font-size:9px}
+body.compact .year-logic{font-size:9px;padding:5px 7px}
 body.compact .intro{height:auto;min-height:55px}
 body.compact #dashboard{height:auto;margin-top:16px}
 body.compact .kpis{height:auto;gap:10px;margin-bottom:15px}

@@ -209,28 +209,31 @@ function butterfly(data) {
   return out;
 }
 function heatmap(stats) {
-  const rows=stats.slice(), labels={all:"Phân khúc",industry:"Theo ngành nghề",size:"Theo quy mô",city:"Theo địa bàn"};
+  const rows=stats.slice(), labels={all:"Quy mô × ngành",industry:"Theo ngành nghề",size:"Theo quy mô",city:"Theo địa bàn"};
   if(!rows.length)return '<div class="no-data">Không có khách đã mua A trong nhóm đang lọc</div>';
   let out=`<table class="heatmap" aria-label="Tỷ lệ khách hàng có A chưa mua B-E theo phân khúc">
     <thead><tr><th>${labels[state.segment]}</th>${"BCDE".split("").map(p=>`<th>${p} · ${PRODUCT[p]}</th>`).join("")}</tr></thead><tbody>`;
   rows.forEach(row=>{
-    const shortLabel=row.label.replace("Doanh nghiệp siêu nhỏ","DN siêu nhỏ").replace("Doanh nghiệp nhỏ","DN nhỏ");
-    out+=`<tr><td class="seg-label" role="button" tabindex="0" data-filter="segment:${row.dimension}:${esc(row.label)}">${esc(shortLabel)}<span class="seg-n">(n=${nf(row.base)})</span></td>`;
+    const shortLabel=row.label.replace("Doanh nghiệp siêu nhỏ","Siêu nhỏ").replace("Doanh nghiệp nhỏ","DN nhỏ")
+      .replace("Thương mại - bán lẻ","Thương mại").replace("Dịch vụ - du lịch","Dịch vụ")
+      .replace("Xây dựng - lắp đặt","Xây dựng").replace("Ngành nghề khác","Khác");
+    out+=`<tr><td class="seg-label ${row.base<30?"small-sample":""}" role="button" tabindex="0" data-filter="segment:${row.dimension}:${esc(row.label)}" title="${row.base<30?"Cỡ mẫu dưới 30: chỉ diễn giải mô tả. ":""}Nhấp để lọc phân khúc">${esc(shortLabel)}<span class="seg-n">(n=${nf(row.base)}${row.base<30?" · ⚠":""})</span></td>`;
     "BCDE".split("").forEach(p=>{
       const n=row.missing[p],rate=n/Math.max(1,row.base),light=97-rate*48;
       const color=rate>.74?"#fff":"#174f81";
-      out+=`<td style="background:hsl(213 64% ${light}%);color:${color}" role="button" tabindex="0" data-filter="heat:${row.dimension}:${esc(row.label)}:${p}" data-tip="${esc(row.label)}: ${nf(n)}/${nf(row.base)} KH có A chưa mua ${PRODUCT[p]} (${pct(n,row.base)}). Bấm để lọc nhóm này">
+      out+=`<td style="background:hsl(213 64% ${light}%);color:${color}" role="button" tabindex="0" data-filter="heat:${row.dimension}:${esc(row.label)}:${p}" data-tip="${esc(row.label)}: ${nf(n)}/${nf(row.base)} KH có A chưa mua ${PRODUCT[p]} (${pct(n,row.base)}).${row.base<30?" Cỡ mẫu nhỏ: chỉ mô tả nhóm này.":""} Bấm để lọc nhóm này">
         ${pct(n,row.base)}<span class="cell-n">(${nf(n)})</span></td>`;
     });
     out+="</tr>";
   });
-  out+=`</tbody></table><div class="heat-foot"><span>Mẫu số: KH đã mua A trong từng phân khúc</span>
+  out+=`</tbody></table><div class="heat-foot"><span>${state.segment==="all"?"Giao thoa quy mô × ngành: mỗi KH chỉ thuộc một hàng; ":""}Mẫu số: KH có A của từng hàng</span>
      <span class="heat-scale">Bấm ô để lọc sâu <i class="heat-gradient"></i> Tỷ lệ cao</span></div>`;
   return out;
 }
 
 function dashboard1() {
   const d=DATA.dashboard1,total=d.totalCustomers,multi=total-d.byProductCount["1"];
+  const top12=d.combinations.slice(0,12).reduce((n,c)=>n+c.count,0),other=Math.max(0,multi-top12);
   const year=state.filters.year;
   const products="ABCDE".split("").map(code=>({code,n:d.perProduct[code]}));
   const singles="ABCDE".split("").map(code=>({code,n:d.singleProduct[code]}));
@@ -251,7 +254,7 @@ function dashboard1() {
       {label:"Từ 3 sản phẩm",n:d.byProductCount["3+"],color:C.orange,filter:"3+"},
     ],total,nf(total),"KHÁCH HÀNG","count"))}
     ${card("03 · Khách hàng chỉ mua một sản phẩm",`Số KH và tỷ trọng trong ${nf(d.byProductCount["1"])} khách chỉ mua 1 SP`,hBars(singles,d.byProductCount["1"],null,true))}
-    ${card("04 · Tổ hợp sản phẩm khách hàng đã mua","Mỗi cột là một tổ hợp chính xác; chấm đậm = có mua",upset(d.combinations),"chart-half",comboSelect)}
+    ${card("04 · Tổ hợp sản phẩm khách hàng đã mua",state.combo==="12"?`Top 12: ${nf(top12)}/${nf(multi)} KH đa SP (${pct(top12,multi)}); ${nf(other)} KH thuộc các tổ hợp khác`:`Tất cả tổ hợp chính xác (${nf(multi)} KH đa sản phẩm); chấm đậm = có mua`,upset(d.combinations),"chart-half",comboSelect)}
   </div>`;
 }
 function dashboard2() {
@@ -277,7 +280,7 @@ function dashboard3() {
   const d=DATA.dashboard3,annual=d.revenue.find(r=>r.year===state.filters.year),totalRev=annual.single+annual.multi;
   const totalSupp=Object.values(d.supplementalMoney).reduce((a,b)=>a+b,0);
   const segmentSelect=`<select class="select" id="segment" aria-label="Phân nhóm heatmap">
-    <option value="all" ${state.segment==="all"?"selected":""}>Quy mô + ngành</option>
+    <option value="all" ${state.segment==="all"?"selected":""}>Quy mô × ngành</option>
     <option value="industry" ${state.segment==="industry"?"selected":""}>Ngành nghề</option>
     <option value="size" ${state.segment==="size"?"selected":""}>Quy mô DN</option>
     <option value="city" ${state.segment==="city"?"selected":""}>Địa bàn</option></select>`;
@@ -291,8 +294,8 @@ function dashboard3() {
     ${card("01 · Doanh số theo nhóm khách hàng 2023–2025","Cột: doanh số (tỷ đồng) · Đường: tỷ trọng nhóm đa SP",revenueCombo(d.revenue),"chart-butterfly")}
     ${card(`02 · Giá trị mua mới B–E sau A năm ${state.filters.year}`,"Waterfall cộng dồn giá trị giao dịch, đơn vị: triệu đồng",waterfall(d.supplementalMoney),"chart-butterfly")}
     ${card("03 · Khách đã mua A: đã mua và chưa mua B–E",`Mỗi cặp có mẫu số ${nf(d.aSubset.base)} khách đã mua A`,butterfly(d.aSubset),"chart-butterfly")}
-    ${card("04 · Khoảng trống mua sản phẩm theo phân khúc","Tỷ lệ KH có A nhưng chưa mua từng sản phẩm B–E",heatmap(state.segment==="all"?
-      [...d.segments.size.map(r=>({...r,dimension:"size"})),...d.segments.industry.map(r=>({...r,dimension:"industry"}))]:
+    ${card("04 · Khoảng trống mua sản phẩm theo phân khúc",state.segment==="all"?"Giao thoa quy mô × ngành · tỷ lệ chưa sở hữu B–E trong nhóm có A":"Theo từng nhóm · tỷ lệ KH có A chưa sở hữu B–E",heatmap(state.segment==="all"?
+      d.segments.sizeIndustry.map(r=>({...r,dimension:"sizeIndustry"})):
       d.segments[state.segment].map(r=>({...r,dimension:state.segment}))),"chart-heat",segmentSelect)}
   </div>`;
 }
@@ -301,7 +304,7 @@ function render() {
   DATA=CrossFilterEngine.aggregate(COHORTS,state.filters);
   const [title,sub]=descriptions[state.view];
   document.getElementById("pageTitle").textContent=title;
-  document.getElementById("tooltip").classList.remove("show");
+  hideTooltip();
   document.getElementById("pageDescription").textContent=dynamicInsight();
   document.getElementById("pageNumber").textContent=String(state.view).padStart(2,"0");
   updateFilterControls();
@@ -314,21 +317,41 @@ function render() {
 }
 function dynamicInsight() {
   const d1=DATA.dashboard1, d2=DATA.dashboard2, d3=DATA.dashboard3;
+  const f=state.filters,year=f.year,total=d1.totalCustomers;
+  const hasDetailFilters=activeEntries().some(([key])=>key!=="year");
+  const caution=sampleCaution(total);
   if(!d1.totalCustomers)return "Không có khách hàng phù hợp. Hãy xóa bớt điều kiện lọc.";
   if(state.view===1) {
-    const singles=d1.byProductCount["1"];
-    if(!singles)return `Toàn bộ ${nf(d1.totalCustomers)} khách trong bộ lọc đã mua từ 2 sản phẩm; hãy xem tổ hợp để phân tích hành vi mua kết hợp.`;
-    return `Trong ${nf(singles)} khách chỉ dùng 1 sản phẩm, ${nf(d1.singleProduct.A)} khách chỉ có AMIS Kế toán (${pct(d1.singleProduct.A,singles)}) — tệp trọng tâm để đánh giá khả năng bán chéo B–E.`;
+    const singles=d1.byProductCount["1"],multi=total-singles;
+    if(!hasDetailFilters)return `Năm ${year}, có ${nf(multi)}/${nf(total)} khách hàng (${pct(multi,total)}) sở hữu từ hai sản phẩm; ${nf(singles)} khách (${pct(singles,total)}) chỉ sở hữu một sản phẩm.`;
+    if(f.productStatus)return `Tệp đang xét gồm ${nf(total)} khách có A và ${f.productStatus.owned?"đã":"chưa"} sở hữu ${PRODUCT[f.productStatus.code]}; ${nf(singles)} khách chỉ có một SP, ${nf(multi)} khách có nhiều SP.${caution}`;
+    if(f.ab)return `Tệp trình tự ${f.ab} gồm ${nf(total)} khách; ${nf(d1.byProductCount["3+"])} khách đã sở hữu từ ba sản phẩm, hữu ích để xem khả năng mở rộng danh mục.${caution}`;
+    if(!singles)return `Tệp đã lọc có ${nf(total)} khách đa sản phẩm; ${nf(d1.byProductCount["3+"])} khách sở hữu từ ba SP. Xem các tổ hợp chính xác để nhận diện cấu hình mua.${caution}`;
+    if(!multi){
+      const top=d3.segments.industry[0],baseA=d3.aSubset.base;
+      return top&&baseA===total?`Tệp có ${nf(total)} khách chỉ sở hữu một sản phẩm; ngành ${top.label} chiếm nhiều nhất (${nf(top.base)} KH, ${pct(top.base,total)}), gợi ý hướng phân nhóm để đánh giá bán chéo.${caution}`:`Tệp đã lọc gồm ${nf(total)} khách sở hữu đúng một sản phẩm; tiếp tục phân nhóm theo ngành và địa bàn.${caution}`;
+    }
+    return `Trong ${nf(total)} khách của tệp lọc, ${nf(multi)} khách sở hữu nhiều SP (${pct(multi,total)}); ${nf(d1.singleProduct.A)} khách chỉ sở hữu A, cần phân nhóm thêm để nghiên cứu bán chéo.${caution}`;
   }
   if(state.view===2) {
-    const row=d2.byYear.find(r=>r.year===state.filters.year),multi=row.initial+row.supplemental;
-    if(!multi)return `Nhóm đang lọc không có khách đa sản phẩm đến cuối ${state.filters.year}; không đủ trường hợp để phân tích hành vi mua bổ sung.`;
-    return `${nf(row.supplemental)}/${nf(multi)} khách đa sản phẩm (${pct(row.supplemental,multi)}) mua bổ sung sau giao dịch đầu — cho thấy bán chéo theo thời gian giữ vai trò đáng kể.`;
+    const row=d2.byYear.find(r=>r.year===year),multi=row.initial+row.supplemental;
+    if(!multi)return `Tệp đang xét không ghi nhận khách đa sản phẩm đến cuối ${year}; không có trình tự mua bổ sung để phân tích.${caution}`;
+    if(!hasDetailFilters)return `Trong ${nf(multi)} khách đa sản phẩm năm ${year}, có ${nf(row.supplemental)} khách (${pct(row.supplemental,multi)}) mua bổ sung sau lần mua đầu, phản ánh vai trò khai thác khách hàng hiện hữu.`;
+    if(f.ab)return `Đã chọn trình tự ${f.ab}: ${nf(total)} khách; ${nf(d1.byProductCount["3+"])} khách sở hữu từ ba SP. Đối chiếu thêm ngành và quy mô để xác định nhóm ưu tiên.${caution}`;
+    if(f.purchaseType)return `Đã chọn ${nf(total)} KH thuộc nhóm ${f.purchaseType==="initial"?"mua kết hợp ban đầu":"có mua bổ sung sau lần đầu"}; ${nf(d1.byProductCount["3+"])} khách đã sở hữu từ ba SP, hỗ trợ phân tích khả năng mở rộng danh mục.${caution}`;
+    if(row.supplemental===multi||row.supplemental===0)return `Trong ${nf(multi)} khách đa sản phẩm thuộc tệp lọc, ${nf(row.initial)} khách mua kết hợp ban đầu và ${nf(row.supplemental)} khách có mua bổ sung; xem cặp A–B để làm rõ trình tự.${caution}`;
+    return `Trong tệp lọc có ${nf(multi)} khách đa sản phẩm, gồm ${nf(row.initial)} khách mua kết hợp ban đầu và ${nf(row.supplemental)} khách có mua bổ sung (${pct(row.supplemental,multi)}).${caution}`;
   }
-  const rev=d3.revenue.find(r=>r.year===state.filters.year),sum=rev.single+rev.multi;
-  if(!sum)return `Chưa ghi nhận doanh số của 5 sản phẩm trong năm ${state.filters.year} với điều kiện lọc đang chọn.`;
-  if(!d3.aSubset.base)return `Nhóm khách đang lọc đóng góp ${nf(sum,2)} tỷ đồng doanh số năm ${state.filters.year}, nhưng chưa có khách sở hữu A để đánh giá bán chéo từ AMIS Kế toán.`;
-  return `Khách đa sản phẩm tạo ${pct(rev.multi,sum)} doanh số năm ${state.filters.year}; ${nf(d3.aSubset.missing.B)}/${nf(d3.aSubset.base)} khách có A chưa mua meInvoice — khoảng trống sở hữu để nghiên cứu bán chéo.`;
+  const rev=d3.revenue.find(r=>r.year===year),sum=rev.single+rev.multi,a=d3.aSubset.base,missing=d3.aSubset.missing.B;
+  if(!sum)return `Tệp khách đã chọn không ghi nhận doanh số của 5 sản phẩm trong năm ${year}.${caution}`;
+  if(!a)return `Tệp đã lọc có doanh số ${nf(sum,2)} tỷ đồng năm ${year}; không có khách sở hữu A để phân tích khoảng trống B–E.${caution}`;
+  if(!hasDetailFilters)return `Khách đa sản phẩm đóng góp ${pct(rev.multi,sum)} doanh số năm ${year}; đồng thời, ${nf(missing)}/${nf(a)} khách sử dụng AMIS Kế toán chưa sở hữu meInvoice — tệp sàng lọc cơ hội bán chéo.`;
+  if(f.productStatus)return `Tệp đang xét có ${nf(total)} khách có A và ${f.productStatus.owned?"đã":"chưa"} sở hữu ${PRODUCT[f.productStatus.code]}; doanh số giao dịch năm ${year} đạt ${nf(sum,2)} tỷ đồng. Phân tích tiếp quy mô × ngành.${caution}`;
+  if(f.revenueClass||rev.multi===sum||rev.multi===0)return `Tệp đã lọc đóng góp ${nf(sum,2)} tỷ đồng doanh số năm ${year}; ${nf(missing)}/${nf(a)} khách có A chưa sở hữu meInvoice. Ưu tiên đối chiếu theo phân khúc.${caution}`;
+  return `Nhóm đa sản phẩm tạo ${nf(rev.multi,2)} tỷ đồng (${pct(rev.multi,sum)}) trên tệp lọc; ${nf(missing)}/${nf(a)} khách có A chưa sở hữu B — khoảng trống cần phân nhóm.${caution}`;
+}
+function sampleCaution(n) {
+  return n<30?` Cỡ mẫu nhỏ (n=${nf(n)}): kết quả chỉ mô tả nhóm đang lọc, không suy rộng.`:"";
 }
 function activeEntries() {
   const f=state.filters;
@@ -363,6 +386,7 @@ function updateFilterControls() {
   document.getElementById("drillDown").title=`Drill down theo ${state.segment==="all"?"quy mô":state.segment==="size"?"ngành nghề":"địa bàn"}`;
   const dateChip=document.querySelector(".date-chip");
   dateChip.innerHTML=`<span class="dot"></span> Tệp KH đến 31/12/${f.year}`;
+  document.getElementById("yearLogic").textContent=`Tệp đến 31/12/${f.year} · Xu hướng: cùng tệp 2023–2025`;
   document.getElementById("filterCountSummary").textContent=`${nf(DATA.dashboard1.totalCustomers)} khách hàng · năm ${f.year}`;
 }
 function resetFilters() {
@@ -385,6 +409,14 @@ function moveDrill(direction) {
   render();
 }
 function selectSegment(dimension,value) {
+  if(dimension==="sizeIndustry"){
+    const [size,industry]=value.split(" × ");
+    const same=state.filters.size===size && state.filters.industry===industry;
+    state.filters.size=same?"":size;
+    state.filters.industry=same?"":industry;
+    state.segment=same?"all":"city";
+    return;
+  }
   toggleValue(dimension,value);
   if(state.filters[dimension]) {
     const next={size:"industry",industry:"city",city:"city"};
@@ -419,8 +451,8 @@ function handleChartFilter(raw) {
     state.filters.productStatus=was&&was.code===p&&was.owned===wanted.owned?null:wanted;
     state.filters.aSubset=!!state.filters.productStatus;
   }
-  else if(kind==="segment" && (p==="size"||p==="industry"||p==="city"))selectSegment(p,parts.slice(2).join(":"));
-  else if(kind==="heat" && (p==="size"||p==="industry"||p==="city")) {
+  else if(kind==="segment" && (p==="size"||p==="industry"||p==="city"||p==="sizeIndustry"))selectSegment(p,parts.slice(2).join(":"));
+  else if(kind==="heat" && (p==="size"||p==="industry"||p==="city"||p==="sizeIndustry")) {
     selectSegment(p,q);
     state.filters.productStatus={code:r,owned:false};
     state.filters.aSubset=true;
@@ -479,11 +511,12 @@ function analysisDetails(id) {
       });break;
     }
     case "1-04": {
-      const first=d1.combinations[0],combos=d1.combinations.slice(0,8);
+      const first=d1.combinations[0],combos=d1.combinations.slice(0,12);
+      const covered=combos.reduce((n,c)=>n+c.count,0),remainder=Math.max(0,multi-covered);
       Object.assign(result,{
         lead:first?`Tổ hợp ${first.code.split("").join(" + ")} phổ biến nhất, với ${nf(first.count)} khách (${pct(first.count,multi)} nhóm đa sản phẩm).`:`Bộ lọc hiện tại chưa ghi nhận khách mua nhiều sản phẩm.`,
         takeaway:`Tần suất các tổ hợp cho thấy sản phẩm nào thường được lựa chọn cùng nhau. Có thể dùng kết quả để xây dựng và kiểm định gói sản phẩm, nhưng tổ hợp mua không tự chỉ ra nguyên nhân lựa chọn.`,
-        definition:`Tổ hợp chính xác: khách chỉ được đếm trong một cấu hình sản phẩm đang sở hữu (ví dụ AB không gồm ABC). Mẫu số: ${nf(multi)} khách đa SP.`,
+        definition:`Tổ hợp chính xác: AB không bao gồm ABC. Top 12 bao phủ ${nf(covered)}/${nf(multi)} KH đa sản phẩm (${pct(covered,multi)}); còn ${nf(remainder)} KH ở các tổ hợp khác.`,
         rows:combos.map(c=>analysisRow(c.code.split("").map(p=>PRODUCT[p]).join(" + "),nf(c.count)+" KH",pct(c.count,multi)+" nhóm đa SP"))
       });break;
     }
@@ -543,19 +576,22 @@ function analysisDetails(id) {
       });break;
     }
     case "3-04": {
-      const segments=state.segment==="all"?[...d3.segments.size,...d3.segments.industry]:d3.segments[state.segment];
-      const best=segments.slice().sort((x,y)=>(y.missing.B/y.base||0)-(x.missing.B/x.base||0))[0];
+      const segments=state.segment==="all"?d3.segments.sizeIndustry:d3.segments[state.segment];
+      const eligible=segments.filter(r=>r.base>=30);
+      const best=eligible.slice().sort((x,y)=>(y.missing.B/y.base||0)-(x.missing.B/x.base||0)||y.base-x.base)[0];
       Object.assign(result,{
-        lead:best?`Phân khúc ${best.label} có ${pct(best.missing.B,best.base)} khách đã mua A nhưng chưa mua meInvoice (${nf(best.missing.B)}/${nf(best.base)} KH).`:`Không có phân khúc A phù hợp với điều kiện lọc.`,
-        takeaway:`So sánh các nhóm theo quy mô, ngành hoặc địa bàn để tìm nơi cần khảo sát nhu cầu bán chéo. Nên xem đồng thời tỷ lệ và cỡ mẫu của từng phân khúc, tránh kết luận chỉ từ tỷ lệ cao.`,
-        definition:`Mẫu số thay đổi theo từng hàng: số khách mua A trong phân khúc đó. Tỷ lệ trong mỗi ô = số KH chưa mua B/C/D/E chia cho mẫu số của hàng.`,
-        rows:segments.slice().sort((x,y)=>y.base-x.base).slice(0,7).map(r=>analysisRow(r.label,nf(r.base)+" KH có A",`${pct(r.missing.B,r.base)} chưa có B · ${pct(r.missing.C,r.base)} chưa có C`))
+        lead:best?`Trong các phân khúc có ít nhất 30 KH sở hữu A, nhóm ${best.label} có ${nf(best.missing.B)}/${nf(best.base)} khách chưa sở hữu meInvoice (${pct(best.missing.B,best.base)}).`:`Không có phân khúc nào đạt 30 KH có A trong tệp đang lọc; các tỷ lệ chỉ có ý nghĩa mô tả.`,
+        takeaway:`Phân khúc kết hợp quy mô × ngành giúp xác định tệp sàng lọc không trùng khách giữa các hàng. Khoảng trống sở hữu B–E chưa đồng nghĩa nhu cầu mua; cần đánh giá mức phù hợp và khả năng chuyển đổi.`,
+        definition:`${state.segment==="all"?"Mỗi hàng là giao thoa quy mô × ngành; mỗi KH thuộc đúng một hàng. ":"Mỗi hàng là một nhóm phân loại riêng. "}Mẫu số từng hàng là số KH đã mua A trong nhóm; tỷ lệ = số KH chưa mua sản phẩm / mẫu số hàng. Hàng n<30 được cảnh báo.`,
+        rows:segments.slice().sort((x,y)=>y.base-x.base).slice(0,10).map(r=>analysisRow(r.label,nf(r.base)+" KH có A",`${pct(r.missing.B,r.base)} chưa có B · ${pct(r.missing.C,r.base)} chưa có C${r.base<30?" · Cỡ mẫu nhỏ":""}`))
       });break;
     }
   }
+  if(total<30)result.takeaway+=sampleCaution(total);
   return result;
 }
 function openAnalysis(id,trigger) {
+  hideTooltip();
   const details=analysisDetails(id);
   let heading,context,preview;
   if(id==="overview"){
@@ -665,6 +701,10 @@ window.addEventListener("resize",fitStage);
 document.addEventListener("fullscreenchange",fitStage);
 fitStage();
 const tip=document.getElementById("tooltip");
+function hideTooltip(){
+  const element=document.getElementById("tooltip");
+  if(element)element.classList.remove("show");
+}
 document.addEventListener("pointerover",e=>{
   const el=e.target.closest("[data-tip]");
   if(!el)return;
@@ -678,8 +718,13 @@ document.addEventListener("pointermove",e=>{
 });
 document.addEventListener("pointerout",e=>{
   const el=e.target.closest("[data-tip]");
-  if(el && !el.contains(e.relatedTarget))tip.classList.remove("show");
+  if(el && !el.contains(e.relatedTarget))hideTooltip();
 });
+document.addEventListener("pointerdown",hideTooltip,{capture:true});
+document.addEventListener("scroll",hideTooltip,{capture:true,passive:true});
+window.addEventListener("blur",hideTooltip);
+document.addEventListener("visibilitychange",hideTooltip);
+analysisDialog.addEventListener("close",hideTooltip);
 fetch("./cohorts.json").then(res=>{
   if(!res.ok)throw new Error("Không tải được dữ liệu");
   return res.json();

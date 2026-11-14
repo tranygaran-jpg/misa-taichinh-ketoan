@@ -61,7 +61,7 @@
     const supplementalMoney = newObject(OTHER);
     const boughtA = newObject(OTHER);
     const missingA = newObject(OTHER);
-    const segments = {size: new Map(), industry: new Map(), city: new Map()};
+    const segments = {size: new Map(), industry: new Map(), city: new Map(), sizeIndustry: new Map()};
     let totalCustomers = 0, baseA = 0;
 
     for (const row of rows) {
@@ -95,8 +95,8 @@
       if (mask.includes("A")) {
         baseA += n;
         for (const code of OTHER) (mask.includes(code) ? boughtA : missingA)[code] += n;
-        for (const dimension of ["size", "industry", "city"]) {
-          const label = row[dimension];
+        for (const dimension of ["size", "industry", "city", "sizeIndustry"]) {
+          const label = dimension === "sizeIndustry" ? `${row.size} × ${row.industry}` : row[dimension];
           if (!segments[dimension].has(label)) segments[dimension].set(label, {label, base: 0, missing: newObject(OTHER)});
           const group = segments[dimension].get(label);
           group.base += n;
