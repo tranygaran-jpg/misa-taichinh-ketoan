@@ -17,7 +17,7 @@ const state = {view:1, combo:"12", segment:"all", filters:{
 const descriptions = {
   1:["DASHBOARD 1 – Cơ cấu khách hàng theo sản phẩm và tổ hợp mua","Khách hàng đã mua sản phẩm nào, mua riêng hay theo tổ hợp nào?"],
   2:["DASHBOARD 2 – Thực trạng mua kết hợp và mua bổ sung","Khách hàng mua cùng lúc hay bổ sung sản phẩm theo thời gian?"],
-  3:["DASHBOARD 3 – Doanh số và cơ hội bán chéo","Cơ cấu doanh số, giá trị giao dịch mua bổ sung và khoảng trống mua sản phẩm."]
+  3:["DASHBOARD 3 – DOANH SỐ VÀ MỨC ĐỘ MUA BỔ SUNG SẢN PHẨM","Cơ cấu doanh số, giá trị giao dịch mua bổ sung và khoảng trống mua sản phẩm."]
 };
 
 function kpi(label,value,unit="",foot="",variant="") {
