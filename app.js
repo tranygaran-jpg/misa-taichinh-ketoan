@@ -254,7 +254,7 @@ function dashboard1() {
       {label:"Từ 3 sản phẩm",n:d.byProductCount["3+"],color:C.orange,filter:"3+"},
     ],total,nf(total),"KHÁCH HÀNG","count"))}
     ${card("03 · Khách hàng chỉ mua một sản phẩm",`Số KH và tỷ trọng trong ${nf(d.byProductCount["1"])} khách chỉ mua 1 SP`,hBars(singles,d.byProductCount["1"],null,true))}
-    ${card("04 · Tổ hợp sản phẩm khách hàng đã mua",state.combo==="12"?`Top 12: ${nf(top12)}/${nf(multi)} KH đa SP (${pct(top12,multi)}); ${nf(other)} KH thuộc các tổ hợp khác`:`Tất cả tổ hợp chính xác (${nf(multi)} KH đa sản phẩm); chấm đậm = có mua`,upset(d.combinations),"chart-half",comboSelect)}
+    ${card("04 – Cơ cấu tổ hợp mua từ hai sản phẩm",state.combo==="12"?`Top 12: ${nf(top12)}/${nf(multi)} KH đa SP (${pct(top12,multi)}); ${nf(other)} KH thuộc các tổ hợp khác`:`Tất cả tổ hợp chính xác (${nf(multi)} KH đa sản phẩm); chấm đậm = có mua`,upset(d.combinations),"chart-half",comboSelect)}
   </div>`;
 }
 function dashboard2() {
