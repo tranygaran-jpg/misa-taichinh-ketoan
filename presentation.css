@@ -34,6 +34,9 @@ body{background:#dae9f7;color:#153e6d;font-family:'Be Vietnam Pro',Arial,sans-se
 .filter-chip{background:#e4f0fa;color:#245f88;border:1px solid #a8d3ed;padding:5px 7px;border-radius:9px;font-size:10px}
 .filter-chip:hover{background:#cae4f6}
 .brand{flex:0 0 auto;gap:10px}
+.brand-logo-crop{display:block;position:relative;flex:0 0 139px;width:139px;height:55px;overflow:hidden;background:#fff}
+.brand-logo-crop img{display:block;position:absolute;max-width:none;width:216px;height:auto;left:-39px;top:-15px}
+.brand-copy{min-width:0}
 .brand-mark{height:34px;width:34px;background:linear-gradient(145deg,#006bb2,#10a9d6);border-radius:9px}
 .brand-main{color:#0872b6;font-size:16px}
 .brand-main span{color:#658eaa}
@@ -176,7 +179,10 @@ body.compact .heat-foot{font-size:8px}
 body.compact .select{min-width:0;max-width:110px;font-size:10px;padding:6px}
 body.compact .bottom-line{position:static;margin-top:20px;font-size:8px}
 body.compact .header{padding:0 10px;gap:4px}
-body.compact .brand{display:none}
+body.compact .brand{display:flex;gap:5px}
+body.compact .brand-logo-crop{flex-basis:105px;width:105px;height:42px}
+body.compact .brand-logo-crop img{width:163px;left:-29px;top:-11px}
+body.compact .brand-copy{display:none}
 body.compact .header-actions{gap:4px}
 body.compact .date-chip{display:none}
 body.compact .tabs{justify-content:flex-start;overflow-x:auto}
