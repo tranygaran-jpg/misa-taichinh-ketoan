@@ -12,7 +12,7 @@
 .kpi{height:117px;padding:16px 23px 12px}
 .kpi-value{margin-top:9px}
 .chart-grid{height:778px;gap:13px}
-.chart-grid.behavior{grid-template-rows:394px 371px}
+.chart-grid.behavior{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:394px 371px}
 .chart-grid.revenue{grid-template-rows:364px 401px}
 .card{padding:14px 16px 11px}
 .card-head{min-height:53px;gap:8px;align-items:flex-start}
@@ -40,6 +40,32 @@
 .chart-grid.revenue .heatmap td{font-size:12.5px;padding:2px 2px}
 .chart-grid.revenue .heatmap .cell-n{font-size:10px}
 .chart-grid.revenue .heat-foot{font-size:10px;margin:4px 3px 0}
+.chart-grid.behavior .chart-role .card-body{padding-top:12px}
+.chart-grid.behavior .chart-sequence .card-body{display:flex;flex-direction:column;overflow:hidden}
+.sequence-table-wrap{overflow-y:auto;overflow-x:hidden;min-height:0;flex:1;border:1px solid #dfebf5;border-radius:8px}
+.sequence-table{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;color:#285779;font-size:12px}
+.sequence-table th{position:sticky;top:0;background:#e9f6fd;color:#286c9c;font-size:10.5px;
+  text-align:center;padding:10px 4px;z-index:1;border-bottom:1px solid #cde2ef}
+.sequence-table th:first-child{width:19%;text-align:left;padding-left:10px}
+.sequence-table th:nth-child(2),.sequence-table th:nth-child(3){width:23%}
+.sequence-table td{border-bottom:1px solid #e4f0f7;padding:6px 5px;text-align:center;font-weight:600}
+.sequence-table td:first-child{text-align:left;padding-left:11px}
+.sequence-table td strong{font-weight:800;color:#14598c}
+.sequence-table td small{display:block;font-size:9.5px;color:#779cb5;font-weight:600;margin-top:2px}
+.sequence-table tbody tr:nth-child(even){background:#f8fcff}
+.sequence-table tbody tr:hover{background:#eaf5fc}
+.sequence-foot{font-size:10.5px;color:#608ba8;margin:5px 2px 0}
+.geography-button{border:1px solid #bcdff1;border-radius:7px;background:#e9f7ff;
+  color:#176da3;font-size:11px;font-weight:800;padding:7px 10px;white-space:nowrap}
+.geography-button:hover{background:#d7eefb}
+.analysis-plot:has(>.geo-table-wrap){display:block;height:auto;min-height:270px;padding:14px}
+.geo-table-wrap{overflow:auto;width:100%}
+.geo-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.geo-table th{text-align:right;background:#eaf7fe;color:#367ba5;font-weight:800;padding:11px 8px}
+.geo-table th:first-child,.geo-table td:first-child{text-align:left;white-space:nowrap}
+.geo-table td{text-align:right;padding:13px 8px;border-bottom:1px solid #deedf7;color:#285b82;font-weight:700}
+.geo-table td small{display:block;font-weight:500;color:#608baa;margin-top:3px}
+.geo-foot{font-size:11px;color:#6891a9;line-height:1.6;margin:10px 3px 0}
 .heatmap .small-sample{color:#b76c20;font-weight:800}
 .heatmap .small-sample .seg-n{color:#a75e1e}
 .heatmap td{font-size:15px;padding:7px 3px}
@@ -121,7 +147,7 @@ body.compact .intro{height:auto;min-height:55px}
 body.compact #dashboard{height:auto;margin-top:16px}
 body.compact .kpis{height:auto;gap:10px;margin-bottom:15px}
 body.compact .kpi{height:110px;padding:12px}
-body.compact .chart-grid,body.compact .chart-grid.behavior,body.compact .chart-grid.revenue{height:auto;grid-template-rows:none;gap:12px}
+body.compact .chart-grid,body.compact .chart-grid.behavior,body.compact .chart-grid.revenue{height:auto;grid-template-columns:1fr;grid-template-rows:none;gap:12px}
 body.compact .chart-grid .card{padding:12px}
 body.compact .card-title{font-size:13px}
 body.compact .card-sub{font-size:10px}
@@ -155,6 +181,6 @@ body.compact .chart-grid.revenue .heatmap{height:auto}
   .kpis{height:117px!important;margin-bottom:17px!important}
   .kpi{height:117px!important;padding:16px 23px 12px!important}
   .chart-grid{height:778px!important;gap:13px!important}
-  .chart-grid.behavior{grid-template-rows:394px 371px!important}
+  .chart-grid.behavior{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:394px 371px!important}
   .chart-grid.revenue{grid-template-rows:364px 401px!important}
 }

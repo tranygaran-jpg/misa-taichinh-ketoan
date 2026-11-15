@@ -12,6 +12,13 @@
     if (mask.length < 2) return mask.length ? "single" : "inactive";
     return [...mask].every(p => row.first.includes(p)) ? "initial" : "supplemental";
   };
+  const purchaseJourney = (row, year) => {
+    const mask = maskAt(row, year);
+    if (mask.length < 2) return "single";
+    const firstCount = [...mask].filter(p => row.first.includes(p)).length;
+    if (firstCount >= 2) return firstCount === mask.length ? "initialOnly" : "initialThen";
+    return "singleThen";
+  };
   const newObject = codes => Object.fromEntries([...codes].map(k => [k, 0]));
   function selectedRows(cohorts, filters) {
     const currentYear = Number(filters.year || 2025);
@@ -27,7 +34,11 @@
         const count = productCount(mask);
         if (filters.count === "3+" ? count < 3 : filters.count === "2+" ? count < 2 : count !== Number(filters.count)) return false;
       }
-      if (filters.purchaseType && buyingGroup(row, currentYear) !== filters.purchaseType) return false;
+      if (filters.purchaseType) {
+        const value = ["initialOnly", "initialThen", "singleThen"].includes(filters.purchaseType) ?
+          purchaseJourney(row, currentYear) : buyingGroup(row, currentYear);
+        if (value !== filters.purchaseType) return false;
+      }
       if (filters.revenueClass) {
         const group = productCount(mask) === 1 ? "single" : "multi";
         if (group !== filters.revenueClass) return false;
@@ -56,12 +67,14 @@
     const comboMap = {};
     const roleFirst = newObject(CODES), roleAdditional = newObject(CODES);
     const ab = {"A→B": 0, "B→A": 0, "A+B": 0};
-    const yearly = YEARS.map(y => ({year: y, single: 0, two: 0, threePlus: 0, initial: 0, supplemental: 0}));
+    const yearly = YEARS.map(y => ({year: y, single: 0, two: 0, threePlus: 0, initial: 0, supplemental: 0,
+      initialOnly: 0, initialThen: 0, singleThen: 0}));
     const revenue = YEARS.map(y => ({year: y, single: 0, multi: 0}));
     const supplementalMoney = newObject(OTHER);
     const boughtA = newObject(OTHER);
     const missingA = newObject(OTHER);
     const segments = {size: new Map(), industry: new Map(), city: new Map(), sizeIndustry: new Map()};
+    const geography = new Map();
     let totalCustomers = 0, baseA = 0;
 
     for (const row of rows) {
@@ -69,6 +82,16 @@
       const mask = maskAt(row, year);
       totalCustomers += n;
       const count = productCount(mask);
+      if (!geography.has(row.city)) geography.set(row.city, {label:row.city, customers:0, multi:0,
+        revenue:0, baseA:0, missingB:0});
+      const geo=geography.get(row.city);
+      geo.customers+=n;
+      if(count>=2)geo.multi+=n;
+      geo.revenue+=row.revenue[yearIndex(year)]/1e9;
+      if(mask.includes("A")){
+        geo.baseA+=n;
+        if(!mask.includes("B"))geo.missingB+=n;
+      }
       const countKey = count >= 3 ? "3+" : String(count);
       byProductCount[countKey] += n;
       if (count >= 2) comboMap[mask] = (comboMap[mask] || 0) + n;
@@ -86,8 +109,10 @@
         else if (ym.length === 2) yearly[i].two += n;
         else yearly[i].threePlus += n;
         if (ym.length > 1) {
-          const initial = [...ym].every(p => row.first.includes(p));
-          yearly[i][initial ? "initial" : "supplemental"] += n;
+          const journey=purchaseJourney(row, YEARS[i]);
+          yearly[i][journey]+=n;
+          if (journey==="initialOnly" || journey==="initialThen") yearly[i].initial+=n;
+          if (journey==="initialThen" || journey==="singleThen") yearly[i].supplemental+=n;
         }
         revenue[i][ym.length === 1 ? "single" : "multi"] += row.revenue[i];
       }
@@ -122,9 +147,11 @@
         supplementalMoney: Object.fromEntries([...OTHER].map(code => [code, supplementalMoney[code] / 1e6])),
         aSubset: {base: baseA, bought: boughtA, missing: missingA},
         segments: Object.fromEntries(Object.entries(segments).map(([dimension, map]) =>
-          [dimension, [...map.values()].sort((a, b) => b.base - a.base || a.label.localeCompare(b.label))]))
+          [dimension, [...map.values()].sort((a, b) => b.base - a.base || a.label.localeCompare(b.label))])),
+        geography: [...geography.values()].sort((a,b)=>["TP. Đà Nẵng","TP. Huế","Quảng Ngãi","Quảng Trị"].indexOf(a.label)-
+          ["TP. Đà Nẵng","TP. Huế","Quảng Ngãi","Quảng Trị"].indexOf(b.label))
       }
     };
   }
-  global.CrossFilterEngine = {aggregate, selectedRows, buyingGroup};
+  global.CrossFilterEngine = {aggregate, selectedRows, buyingGroup, purchaseJourney};
 })(globalThis);

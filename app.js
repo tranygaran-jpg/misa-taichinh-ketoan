@@ -8,7 +8,7 @@ const PRODUCT = {A:"AMIS Kế toán", B:"meInvoice", C:"eSign", D:"mTax", E:"Jet
 const nf = (v, digits=0) => new Intl.NumberFormat("vi-VN",{minimumFractionDigits:digits,maximumFractionDigits:digits}).format(v);
 const pct = (n,d, digits=1) => d ? nf(100*n/d,digits)+"%" : "—";
 const esc = s => String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
-let DATA, COHORTS;
+let DATA, COHORTS, SEQUENCE_SUMMARY;
 const state = {view:1, combo:"12", segment:"all", filters:{
   year:2025,size:"",industry:"",city:"",product:"",count:"",
   combo:"",ab:"",role:null,purchaseType:"",revenueClass:"",
@@ -87,24 +87,41 @@ function upset(items) {
   </svg></div>`;
 }
 function stackedYears(rows) {
-  const W=700,H=264,left=55,base=225,top=34,max=Math.max(100,Math.ceil(Math.max(...rows.map(r=>r.initial+r.supplemental))*1.08/100)*100);
-  let out=`<svg class="chart-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Cột chồng mua kết hợp và mua bổ sung theo năm">
+  const W=700,H=264,left=55,base=227,top=40,max=Math.max(100,Math.ceil(Math.max(...rows.map(r=>r.initialOnly+r.initialThen+r.singleThen))*1.08/100)*100);
+  let out=`<svg class="chart-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Cột chồng ba nhóm hành vi mua sản phẩm theo năm">
     ${Array.from({length:6},(_,i)=>max*i/5).map(t=>`<line x1="${left}" x2="682" y1="${base-(t/max)*(base-top)}" y2="${base-(t/max)*(base-top)}" class="grid-line"/>
-       <text x="44" y="${base-(t/max)*(base-top)+3}" text-anchor="end" class="svg-tick">${t}</text>`).join("")}
-    ${legendSVG([[C.navy,"Mua kết hợp ban đầu"],[C.sky,"Có mua bổ sung"]],165,12)}
+       <text x="44" y="${base-(t/max)*(base-top)+3}" text-anchor="end" class="svg-tick">${nf(t)}</text>`).join("")}
+    ${legendSVG([[C.navy,"Kết hợp đầu, không mua thêm"],[C.orange,"Kết hợp đầu, có mua thêm"],[C.sky,"Một SP đầu, mua thêm"]],66,14)}
   `;
   rows.forEach((r,i)=>{
-    const x=135+i*190,w=90;
-    const bottom=r.initial/max*(base-top), upper=r.supplemental/max*(base-top);
-    out+=`<g data-tip="${r.year}: ${nf(r.initial)} mua kết hợp ban đầu, ${nf(r.supplemental)} có mua bổ sung">
-      <rect data-filter="purchaseType:initial:${r.year}" tabindex="0" role="button" x="${x}" y="${base-bottom}" width="${w}" height="${bottom}" rx="3" fill="${C.navy}"/>
-      <rect data-filter="purchaseType:supplemental:${r.year}" tabindex="0" role="button" x="${x}" y="${base-bottom-upper}" width="${w}" height="${upper}" rx="3" fill="${C.sky}"/>
-      <text x="${x+w/2}" y="${base-bottom/2+4}" text-anchor="middle" class="svg-value-white">${r.initial}</text>
-      <text x="${x+w/2}" y="${base-bottom-upper/2+4}" text-anchor="middle" class="svg-value" style="fill:#1b477e">${r.supplemental}</text>
-      <text x="${x+w/2}" y="${base-bottom-upper-9}" text-anchor="middle" class="svg-value">${r.initial+r.supplemental}</text>
-      <text x="${x+w/2}" y="249" text-anchor="middle" class="svg-label" data-filter="year:${r.year}" tabindex="0" role="button">${r.year}</text></g>`;
+    const x=125+i*193,w=106,groups=[
+      ["initialOnly",r.initialOnly,C.navy,"Kết hợp ngay lần đầu, không mua thêm","#fff"],
+      ["initialThen",r.initialThen,C.orange,"Kết hợp ngay lần đầu, sau đó mua thêm","#543518"],
+      ["singleThen",r.singleThen,C.sky,"Mua một sản phẩm ban đầu, sau đó mua thêm","#174c79"]
+    ];
+    let y=base;
+    const total=r.initialOnly+r.initialThen+r.singleThen;
+    out+=`<g data-tip="${r.year}: ${nf(r.initialOnly)} kết hợp đầu không mua thêm; ${nf(r.initialThen)} kết hợp đầu và mua bổ sung; ${nf(r.singleThen)} từ một SP đầu mua bổ sung. Tổng ${nf(total)} KH">`;
+    for(const [code,count,color,label,textColor] of groups) {
+      const h=count/max*(base-top);y-=h;
+      out+=`<rect data-filter="purchaseType:${code}:${r.year}" tabindex="0" role="button" x="${x}" y="${y}" width="${w}" height="${h}" rx="2" fill="${color}" data-tip="${r.year}: ${label}: ${nf(count)} KH"/>
+        ${h>13?`<text x="${x+w/2}" y="${y+h/2+4}" text-anchor="middle" font-size="11.5" font-weight="800" fill="${textColor}" pointer-events="none">${nf(count)}</text>`:""}`;
+    }
+    out+=`<text x="${x+w/2}" y="${y-9}" text-anchor="middle" class="svg-value">${nf(total)}</text>
+      <text x="${x+w/2}" y="250" text-anchor="middle" class="svg-label" data-filter="year:${r.year}" tabindex="0" role="button">${r.year}</text></g>`;
   });
   return out+"</svg>";
+}
+function sequenceTable(pairs) {
+  const existing=pairs.filter(r=>r.total).sort((a,b)=>b.total-a.total);
+  return `<div class="sequence-table-wrap"><table class="sequence-table" aria-label="Trình tự mua giữa các cặp sản phẩm và khoảng cách trung vị">
+    <thead><tr><th>Cặp SP</th><th>Chiều thuận</th><th>Chiều ngược</th><th>Cùng ngày</th><th>Trung vị (ngày)</th></tr></thead>
+    <tbody>${existing.map(r=>`<tr data-tip="${esc(PRODUCT[r.a])} và ${esc(PRODUCT[r.b])}: ${nf(r.total)} KH cùng sở hữu; trung vị ${r.medianDays===null?"không có":nf(r.medianDays,1)+" ngày"} giữa hai ngày mua khác nhau">
+      <td><strong>${r.a}–${r.b}</strong><small>${nf(r.total)} KH</small></td>
+      <td><strong>${nf(r.forward)}</strong><small>${r.a}→${r.b}</small></td>
+      <td><strong>${nf(r.reverse)}</strong><small>${r.b}→${r.a}</small></td>
+      <td>${nf(r.same)}</td><td><strong>${r.medianDays===null?"—":nf(r.medianDays,1)}</strong></td>
+    </tr>`).join("")}</tbody></table></div><div class="sequence-foot">Toàn bộ tệp năm ${state.filters.year}; bảng không chịu tác động của bộ lọc phân khúc. Trung vị không tính các cặp mua cùng ngày.</div>`;
 }
 function legendSVG(items,x,y) {
   return items.map(([color,label],i)=>`<rect x="${x+i*200}" y="${y-8}" width="9" height="9" rx="2" fill="${color}"/>
@@ -181,7 +198,7 @@ function waterfall(obj) {
       </g>`;
   });
   const ty=base-sum/max*(base-top);
-  out+=`<g data-tip="Tổng giá trị mua mới B–E sau A: ${nf(sum,2)} triệu đồng">
+  out+=`<g data-tip="Tổng trong phạm vi mua mới B–E sau A: ${nf(sum,2)} triệu đồng; không đại diện toàn bộ doanh số bán chéo">
     <rect x="584" y="${ty}" width="79" height="${base-ty}" rx="3" fill="${C.navy}"/>
     <text x="623" y="${ty-9}" text-anchor="middle" class="svg-value" font-size="12">${nf(sum,2)}</text>
     <text x="623" y="241" text-anchor="middle" class="svg-label">Tổng</text></g>`;
@@ -260,21 +277,32 @@ function dashboard1() {
 function dashboard2() {
   const d=DATA.dashboard2,now=d.byYear.find(r=>r.year===state.filters.year);
   const ab=d.aBSequence,totalAb=ab["A→B"]+ab["B→A"]+ab["A+B"];
+  const multi=now.initialOnly+now.initialThen+now.singleThen;
+  const pairStats=SEQUENCE_SUMMARY.byYear[String(state.filters.year)]||[];
   return `<div class="kpis">
-    ${kpi("Khách hàng đa sản phẩm",nf(now.initial+now.supplemental),"KH",`Lũy kế đến cuối ${state.filters.year}`,"featured")}
-    ${kpi("Mua kết hợp ban đầu",nf(now.initial),"KH","Không phát sinh mua bổ sung")}
-    ${kpi("Có lịch sử mua bổ sung",nf(now.supplemental),"KH","Sản phẩm mua sau lần đầu","orange")}
+    ${kpi("Khách hàng đa sản phẩm",nf(multi),"KH",`Lũy kế đến cuối ${state.filters.year}`,"featured")}
+    ${kpi("Mua kết hợp ngay lần đầu",nf(now.initial),"KH",`${nf(now.initialThen)} KH tiếp tục mua bổ sung`)}
+    ${kpi("Có lịch sử mua bổ sung",nf(now.supplemental),"KH",`${nf(now.initialThen)} KH giao với nhóm kết hợp ban đầu`,"orange")}
     ${kpi("Trình tự A → B",nf(ab["A→B"]),"KH","Mua A trước, sau đó mua B")}
   </div>
   <div class="chart-grid behavior">
-    ${card("01 · Mua kết hợp và mua bổ sung 2023–2025","Khách hàng đa SP lũy kế từng năm trong tệp đang lọc",stackedYears(d.byYear),"chart-large")}
+    ${card("01 · Ba nhóm hành vi mua sản phẩm 2023–2025","Ba nhóm không trùng nhau: kết hợp ban đầu, kết hợp rồi mua thêm, hoặc mua thêm sau một SP đầu tiên",stackedYears(d.byYear),"chart-large")}
     ${card("02 · Trình tự mua giữa A và B",`Trong ${nf(totalAb)} khách đã mua cả A và B`,donut([
       {label:"A trước B",n:ab["A→B"],color:C.navy,filter:"A→B"},
       {label:"B trước A",n:ab["B→A"],color:C.orange,filter:"B→A"},
       {label:"A + B cùng ngày",n:ab["A+B"],color:C.sky,filter:"A+B"},
     ],totalAb,nf(totalAb),"KHÁCH HÀNG","ab"),"chart-large")}
-    ${card("03 · Vai trò từng sản phẩm trong trình tự mua","Tỷ trọng và số KH mua sản phẩm ở lần đầu hoặc mua bổ sung sau lần đầu",roleBars(d.byProductRole),"chart-wide wide")}
+    ${card("03 · Vai trò từng sản phẩm trong trình tự mua","Tỷ trọng và số KH mua sản phẩm ở lần đầu hoặc mua bổ sung sau lần đầu",roleBars(d.byProductRole),"chart-large chart-role")}
+    ${card("04 · Trình tự mua giữa các cặp sản phẩm","Số KH và trung vị ngày giữa hai lần mua · toàn bộ tệp theo năm",sequenceTable(pairStats),"chart-large chart-sequence")}
   </div>`;
+}
+function geoTable(rows) {
+  if(!rows.length)return '<div class="no-data">Không có khách hàng thuộc địa bàn đang lọc.</div>';
+  return `<div class="geo-table-wrap"><table class="geo-table" aria-label="Địa bàn, cơ cấu khách hàng và doanh số">
+    <thead><tr><th>Địa bàn</th><th>Tổng KH</th><th>KH đa SP</th><th>Doanh số 5 SP</th><th>KH có A</th><th>Có A, chưa B</th></tr></thead>
+    <tbody>${rows.map(r=>`<tr><td>${esc(r.label)}</td><td>${nf(r.customers)}</td><td>${nf(r.multi)}<small>${pct(r.multi,r.customers)}</small></td>
+      <td>${nf(r.revenue,3)} tỷ</td><td>${nf(r.baseA)}</td><td>${nf(r.missingB)}<small>${pct(r.missingB,r.baseA)}</small></td></tr>`).join("")}</tbody>
+    </table></div><p class="geo-foot">Mỗi khách thuộc một địa bàn. Doanh số tính theo giao dịch trong năm lọc; sở hữu sản phẩm lũy kế đến cuối năm.</p>`;
 }
 function dashboard3() {
   const d=DATA.dashboard3,annual=d.revenue.find(r=>r.year===state.filters.year),totalRev=annual.single+annual.multi;
@@ -284,19 +312,20 @@ function dashboard3() {
     <option value="industry" ${state.segment==="industry"?"selected":""}>Ngành nghề</option>
     <option value="size" ${state.segment==="size"?"selected":""}>Quy mô DN</option>
     <option value="city" ${state.segment==="city"?"selected":""}>Địa bàn</option></select>`;
+  const geoButton=`<button type="button" class="geography-button" data-detail="3-05" title="Bảng đối chiếu Đà Nẵng, Huế, Quảng Ngãi và Quảng Trị">▦ Bảng 4 địa bàn</button>`;
   return `<div class="kpis">
     ${kpi(`Doanh số 5 sản phẩm năm ${state.filters.year}`,nf(totalRev,2),"tỷ đồng","Giá trị giao dịch chưa VAT","featured")}
     ${kpi("Doanh số nhóm khách đa SP",nf(annual.multi,2),"tỷ đồng",pct(annual.multi,totalRev)+" doanh số 5 SP")}
-    ${kpi(`Mua mới B–E sau A năm ${state.filters.year}`,nf(totalSupp,2),"triệu đồng","Giá trị giao dịch mua bổ sung","orange")}
+    ${kpi(`Mua mới SP khác sau A năm ${state.filters.year}`,nf(totalSupp,2),"triệu đồng","Chỉ mua mới B–E sau lần mua A đầu tiên","orange")}
     ${kpi("Khách hàng chỉ mua A",nf(DATA.dashboard1.singleProduct.A),"KH",PRODUCT.A)}
   </div>
   <div class="chart-grid revenue">
     ${card("01 · Doanh số theo nhóm khách hàng 2023–2025","Cột: doanh số (tỷ đồng) · Đường: tỷ trọng nhóm đa SP",revenueCombo(d.revenue),"chart-butterfly")}
-    ${card(`02 · Giá trị mua mới B–E sau A năm ${state.filters.year}`,"Waterfall cộng dồn giá trị giao dịch, đơn vị: triệu đồng",waterfall(d.supplementalMoney),"chart-butterfly")}
+    ${card(`02 · Giá trị mua mới sản phẩm khác sau AMIS Kế toán`,"Chỉ giao dịch mua mới B–E sau A, không phải tổng doanh số bán chéo · triệu đồng",waterfall(d.supplementalMoney),"chart-butterfly")}
     ${card("03 · Khách đã mua A: đã mua và chưa mua B–E",`Mỗi cặp có mẫu số ${nf(d.aSubset.base)} khách đã mua A`,butterfly(d.aSubset),"chart-butterfly")}
     ${card("04 · Khoảng trống mua sản phẩm theo phân khúc",state.segment==="all"?"Giao thoa quy mô × ngành · tỷ lệ chưa sở hữu B–E trong nhóm có A":"Theo từng nhóm · tỷ lệ KH có A chưa sở hữu B–E",heatmap(state.segment==="all"?
       d.segments.sizeIndustry.map(r=>({...r,dimension:"sizeIndustry"})):
-      d.segments[state.segment].map(r=>({...r,dimension:state.segment}))),"chart-heat",segmentSelect)}
+      d.segments[state.segment].map(r=>({...r,dimension:state.segment}))),"chart-heat",segmentSelect+geoButton)}
   </div>`;
 }
 function render() {
@@ -334,13 +363,12 @@ function dynamicInsight() {
     return `Trong ${nf(total)} khách của tệp lọc, ${nf(multi)} khách sở hữu nhiều SP (${pct(multi,total)}); ${nf(d1.singleProduct.A)} khách chỉ sở hữu A, cần phân nhóm thêm để nghiên cứu bán chéo.${caution}`;
   }
   if(state.view===2) {
-    const row=d2.byYear.find(r=>r.year===year),multi=row.initial+row.supplemental;
+    const row=d2.byYear.find(r=>r.year===year),multi=row.initialOnly+row.initialThen+row.singleThen;
     if(!multi)return `Tệp đang xét không ghi nhận khách đa sản phẩm đến cuối ${year}; không có trình tự mua bổ sung để phân tích.${caution}`;
-    if(!hasDetailFilters)return `Trong ${nf(multi)} khách đa sản phẩm năm ${year}, có ${nf(row.supplemental)} khách (${pct(row.supplemental,multi)}) mua bổ sung sau lần mua đầu, phản ánh vai trò khai thác khách hàng hiện hữu.`;
+    if(!hasDetailFilters)return `Trong ${nf(multi)} khách đa sản phẩm năm ${year}, ${nf(row.initial)} khách mua kết hợp ngay lần đầu; ${nf(row.supplemental)} khách mua bổ sung về sau. Có ${nf(row.initialThen)} khách thuộc cả hai nhóm; ba nhóm không trùng nhau là ${nf(row.initialOnly)} – ${nf(row.initialThen)} – ${nf(row.singleThen)}.`;
     if(f.ab)return `Đã chọn trình tự ${f.ab}: ${nf(total)} khách; ${nf(d1.byProductCount["3+"])} khách sở hữu từ ba SP. Đối chiếu thêm ngành và quy mô để xác định nhóm ưu tiên.${caution}`;
-    if(f.purchaseType)return `Đã chọn ${nf(total)} KH thuộc nhóm ${f.purchaseType==="initial"?"mua kết hợp ban đầu":"có mua bổ sung sau lần đầu"}; ${nf(d1.byProductCount["3+"])} khách đã sở hữu từ ba SP, hỗ trợ phân tích khả năng mở rộng danh mục.${caution}`;
-    if(row.supplemental===multi||row.supplemental===0)return `Trong ${nf(multi)} khách đa sản phẩm thuộc tệp lọc, ${nf(row.initial)} khách mua kết hợp ban đầu và ${nf(row.supplemental)} khách có mua bổ sung; xem cặp A–B để làm rõ trình tự.${caution}`;
-    return `Trong tệp lọc có ${nf(multi)} khách đa sản phẩm, gồm ${nf(row.initial)} khách mua kết hợp ban đầu và ${nf(row.supplemental)} khách có mua bổ sung (${pct(row.supplemental,multi)}).${caution}`;
+    if(f.purchaseType)return `Đã chọn ${nf(total)} KH thuộc nhóm ${purchaseTypeLabel(f.purchaseType).toLowerCase()}; có ${nf(d1.byProductCount["3+"])} khách đã mua từ ba sản phẩm.${caution}`;
+    return `Trong ${nf(multi)} khách đa sản phẩm thuộc tệp lọc: ${nf(row.initialOnly)} mua kết hợp ban đầu không mua thêm, ${nf(row.initialThen)} mua kết hợp rồi mua thêm, ${nf(row.singleThen)} mua một SP đầu tiên rồi bổ sung sản phẩm khác.${caution}`;
   }
   const rev=d3.revenue.find(r=>r.year===year),sum=rev.single+rev.multi,a=d3.aSubset.base,missing=d3.aSubset.missing.B;
   if(!sum)return `Tệp khách đã chọn không ghi nhận doanh số của 5 sản phẩm trong năm ${year}.${caution}`;
@@ -352,6 +380,10 @@ function dynamicInsight() {
 }
 function sampleCaution(n) {
   return n<30?` Cỡ mẫu nhỏ (n=${nf(n)}): kết quả chỉ mô tả nhóm đang lọc, không suy rộng.`:"";
+}
+function purchaseTypeLabel(value) {
+  return ({initialOnly:"Kết hợp đầu, không mua thêm",initialThen:"Kết hợp đầu, sau đó mua thêm",
+    singleThen:"Một SP đầu, sau đó mua thêm",initial:"Kết hợp ban đầu",supplemental:"Có mua bổ sung"})[value]||value;
 }
 function activeEntries() {
   const f=state.filters;
@@ -365,7 +397,7 @@ function activeEntries() {
     f.combo&&["combo",`Tổ hợp ${f.combo}`],
     f.ab&&["ab",`Trình tự ${f.ab}`],
     f.role&&["role",`${f.role.code}: ${f.role.mode==="first"?"Mua đầu":"Mua sau"}`],
-    f.purchaseType&&["purchaseType",f.purchaseType==="initial"?"Mua kết hợp đầu":"Có mua bổ sung"],
+    f.purchaseType&&["purchaseType",purchaseTypeLabel(f.purchaseType)],
     f.revenueClass&&["revenueClass",f.revenueClass==="multi"?"Doanh số KH đa SP":"Doanh số KH đơn SP"],
     f.productStatus&&["productStatus",`${f.productStatus.owned?"Đã mua":"Chưa mua"} ${f.productStatus.code} trong tệp A`]
   ].filter(Boolean);
@@ -522,12 +554,16 @@ function analysisDetails(id) {
       });break;
     }
     case "2-01": {
-      const mult=yearBehavior.initial+yearBehavior.supplemental;
+      const mult=yearBehavior.initialOnly+yearBehavior.initialThen+yearBehavior.singleThen;
       Object.assign(result,{
-        lead:`Đến cuối ${year}, ${nf(yearBehavior.supplemental)}/${nf(mult)} khách đa sản phẩm (${pct(yearBehavior.supplemental,mult)}) có lịch sử mua thêm sau giao dịch đầu.`,
-        takeaway:`Mua bổ sung sau thời điểm đầu cho thấy tiềm năng phát triển danh mục trên khách hàng hiện hữu. Khi đề xuất giải pháp bán chéo, cần phân biệt chào gói ngay từ đầu với gói mở rộng ở lần mua sau.`,
-        definition:`Mua kết hợp ban đầu: các sản phẩm trong danh mục có ngày mua đầu cùng thời điểm. Mua bổ sung: có ít nhất một sản phẩm được mua ở thời điểm sau. Đếm KH đa SP lũy kế cuối từng năm.`,
-        rows:d2.byYear.map(r=>analysisRow(String(r.year),nf(r.supplemental)+" KH bổ sung",`${nf(r.initial)} kết hợp ban đầu · ${pct(r.supplemental,r.initial+r.supplemental)} bổ sung`))
+        lead:`Đến cuối ${year}, ${nf(mult)} khách đa sản phẩm gồm ba nhóm không trùng nhau: ${nf(yearBehavior.initialOnly)} chỉ mua kết hợp ban đầu, ${nf(yearBehavior.initialThen)} kết hợp ban đầu rồi mua thêm và ${nf(yearBehavior.singleThen)} từ một sản phẩm đầu tiên mua thêm.`,
+        takeaway:`Số khách mua kết hợp ngay lần đầu là ${nf(yearBehavior.initial)} = ${nf(yearBehavior.initialOnly)} + ${nf(yearBehavior.initialThen)}; số khách có mua bổ sung là ${nf(yearBehavior.supplemental)} = ${nf(yearBehavior.initialThen)} + ${nf(yearBehavior.singleThen)}. Hai chỉ tiêu có ${nf(yearBehavior.initialThen)} khách giao nhau nên không được cộng để tính tổng khách đa sản phẩm.`,
+        definition:`Nhóm 1: mua ít nhất hai sản phẩm ngay lần giao dịch đầu, không mua thêm loại sản phẩm khác sau đó. Nhóm 2: mua từ hai sản phẩm lần đầu và mua thêm loại khác sau. Nhóm 3: mua một sản phẩm đầu, rồi mua thêm loại khác. Xét lũy kế đến 31/12 từng năm.`,
+        rows:d2.byYear.flatMap(r=>[
+          analysisRow(`${r.year} · Kết hợp đầu, không mua thêm`,nf(r.initialOnly)+" KH",pct(r.initialOnly,r.initialOnly+r.initialThen+r.singleThen)+" nhóm đa SP"),
+          analysisRow(`${r.year} · Kết hợp đầu, có mua thêm`,nf(r.initialThen)+" KH",pct(r.initialThen,r.initialOnly+r.initialThen+r.singleThen)+" nhóm đa SP"),
+          analysisRow(`${r.year} · Một SP đầu, sau đó mua thêm`,nf(r.singleThen)+" KH",pct(r.singleThen,r.initialOnly+r.initialThen+r.singleThen)+" nhóm đa SP")
+        ])
       });break;
     }
     case "2-02": {
@@ -548,6 +584,18 @@ function analysisDetails(id) {
         rows:products.map(r=>analysisRow(displayProduct(r.code),nf(r.additional)+" KH bổ sung",`${nf(r.first)} KH mua ban đầu · ${pct(r.additional,r.first+r.additional)} bổ sung`))
       });break;
     }
+    case "2-04": {
+      const pairs=SEQUENCE_SUMMARY.byYear[String(state.filters.year)]||[];
+      const ranked=pairs.slice().sort((a,b)=>b.total-a.total);
+      const top=ranked[0];
+      Object.assign(result,{
+        lead:top&&top.total?`Cặp ${top.a}–${top.b} được mua bởi ${nf(top.total)} khách; ${nf(top.forward)} khách mua ${top.a} trước ${top.b}, ${nf(top.reverse)} mua theo chiều ngược lại và ${nf(top.same)} mua cùng ngày.`:"Không có cặp sản phẩm được mua chung trong tệp đang xét.",
+        takeaway:"Đối chiếu trình tự và khoảng cách giữa các lần mua giúp phân biệt tổ hợp mua cùng ngày với mua bổ sung sau lần đầu. Một khách có thể xuất hiện trong nhiều cặp nếu đã mua từ ba sản phẩm trở lên.",
+        definition:`Các cặp dùng ngày mua mới đầu tiên của từng sản phẩm, không lấy ngày gia hạn. Trung vị là trung vị số ngày chênh lệch tuyệt đối của các cặp được mua khác ngày; loại trừ nhóm cùng ngày. Bảng tổng hợp trên toàn bộ tệp khách lũy kế đến cuối ${year}, độc lập với các bộ lọc phân khúc trên màn hình.`,
+        rows:ranked.filter(r=>r.total).map(r=>analysisRow(`${r.a}–${r.b}: ${PRODUCT[r.a]} + ${PRODUCT[r.b]}`,
+          nf(r.total)+" KH",`${nf(r.forward)} ${r.a}→${r.b} · ${nf(r.reverse)} ${r.b}→${r.a} · ${nf(r.same)} cùng ngày · Trung vị ${r.medianDays===null?"—":nf(r.medianDays,1)+" ngày"}`))
+      });break;
+    }
     case "3-01": {
       const old=d3.revenue[0],oldShare=old.multi/(old.single+old.multi||1),newShare=yearRevenue.multi/(revTotal||1);
       Object.assign(result,{
@@ -561,9 +609,9 @@ function analysisDetails(id) {
       const supp=d3.supplementalMoney,totalSupp=Object.values(supp).reduce((s,n)=>s+n,0);
       const ranked=Object.entries(supp).sort((x,y)=>y[1]-x[1]);
       Object.assign(result,{
-        lead:`Giá trị mua mới B–E sau khi đã mua A đạt ${nf(totalSupp,2)} triệu đồng trong năm ${year}; ${PRODUCT[ranked[0][0]]} đóng góp lớn nhất (${pct(ranked[0][1],totalSupp)}).`,
-        takeaway:`Cơ cấu giá trị mua sau A giúp ưu tiên nghiên cứu sản phẩm bổ trợ theo đóng góp giao dịch. Cần phối hợp tần suất khách mua với giá trị để tránh ưu tiên chỉ theo doanh số.`,
-        definition:`Cộng giá trị giao dịch mua mới sản phẩm B–E sau lần mua A đầu tiên trong năm ${year}, đơn vị triệu đồng, chưa VAT; không phải tổng doanh thu của các sản phẩm.`,
+        lead:`Giá trị mua mới các sản phẩm khác sau AMIS Kế toán đạt ${nf(totalSupp,2)} triệu đồng năm ${year}; ${PRODUCT[ranked[0][0]]} chiếm ${pct(ranked[0][1],totalSupp)} chỉ tiêu này.`,
+        takeaway:`Đây là doanh số giao dịch mua mới sản phẩm B–E phát sinh sau khi khách đã mua A, không phải tổng doanh số bán chéo, cũng không phải tổng doanh thu kế toán. Cần đối chiếu thêm số khách và các trình tự mua khác ngoài A trước.`,
+        definition:`Chỉ cộng giao dịch loại “Mua mới” của sản phẩm B–E có ngày mua sau ngày mua A đầu tiên, phát sinh trong năm ${year}; đơn vị triệu đồng, chưa VAT. Không bao gồm mọi hình thức kết hợp hoặc bán chéo trong danh mục.`,
         rows:ranked.map(([p,n])=>analysisRow(displayProduct(p),nf(n,2)+" triệu",pct(n,totalSupp)+" tổng giá trị mua sau A"))
       });break;
     }
@@ -587,6 +635,16 @@ function analysisDetails(id) {
         rows:segments.slice().sort((x,y)=>y.base-x.base).slice(0,10).map(r=>analysisRow(r.label,nf(r.base)+" KH có A",`${pct(r.missing.B,r.base)} chưa có B · ${pct(r.missing.C,r.base)} chưa có C${r.base<30?" · Cỡ mẫu nhỏ":""}`))
       });break;
     }
+    case "3-05": {
+      const geo=d3.geography,most=geo.slice().sort((a,b)=>b.customers-a.customers)[0];
+      Object.assign(result,{
+        lead:most?`${most.label} có ${nf(most.customers)} khách trong tệp đang lọc, gồm ${nf(most.multi)} khách đa sản phẩm (${pct(most.multi,most.customers)}); doanh số 5 sản phẩm trong năm ${year} đạt ${nf(most.revenue,3)} tỷ đồng.`:"Không có khách hàng trong tệp địa bàn đang lọc.",
+        takeaway:"So sánh quy mô khách hàng, tỷ trọng mua nhiều sản phẩm, doanh số giao dịch và khoảng trống sở hữu A–B theo từng địa bàn giúp lựa chọn thị trường cần phân tích sâu hơn. Số chưa mua B chưa phản ánh nhu cầu hay khả năng chuyển đổi.",
+        definition:`Tổng khách và số sản phẩm đã mua: lũy kế đến 31/12/${year}; doanh số: giá trị giao dịch 5 sản phẩm phát sinh trong năm ${year}, chưa VAT. Mỗi khách thuộc đúng một địa bàn. Mẫu số tỷ lệ chưa có B là khách đã mua A trong địa bàn.`,
+        rows:geo.map(r=>analysisRow(r.label,`${nf(r.customers)} KH · ${nf(r.revenue,3)} tỷ`,
+          `${nf(r.multi)} đa SP (${pct(r.multi,r.customers)}) · ${nf(r.missingB)}/${nf(r.baseA)} có A chưa B (${pct(r.missingB,r.baseA)})`))
+      });break;
+    }
   }
   if(total<30)result.takeaway+=sampleCaution(total);
   return result;
@@ -605,6 +663,11 @@ function openAnalysis(id,trigger) {
     heading=source.querySelector(".card-title").textContent;
     context=source.querySelector(".card-sub").textContent;
     preview=source.querySelector(".card-body").innerHTML;
+    if(id==="3-05"){
+      heading="05 · Phân tích theo địa bàn";
+      context=`Đà Nẵng · Huế · Quảng Ngãi · Quảng Trị · năm ${state.filters.year}`;
+      preview=geoTable(DATA.dashboard3.geography);
+    }
   }
   document.getElementById("analysisEyebrow").textContent=id==="overview"?"BỨC TRANH CHUNG · 3 DASHBOARD":`DASHBOARD ${state.view} · PHÂN TÍCH CHI TIẾT`;
   document.getElementById("analysisTitle").textContent=heading;
@@ -730,9 +793,9 @@ document.addEventListener("scroll",hideTooltip,{capture:true,passive:true});
 window.addEventListener("blur",hideTooltip);
 document.addEventListener("visibilitychange",hideTooltip);
 analysisDialog.addEventListener("close",hideTooltip);
-fetch("./cohorts.json").then(res=>{
+Promise.all(["./cohorts.json","./sequence-summary.json"].map(url=>fetch(url).then(res=>{
   if(!res.ok)throw new Error("Không tải được dữ liệu");
   return res.json();
-}).then(cohorts=>{COHORTS=cohorts;render();}).catch(err=>{
+}))).then(([cohorts,summary])=>{COHORTS=cohorts;SEQUENCE_SUMMARY=summary;render();}).catch(err=>{
   document.getElementById("dashboard").innerHTML=`<div class="loading error">${esc(err.message)}. Vui lòng tải lại trang.</div>`;
 });
