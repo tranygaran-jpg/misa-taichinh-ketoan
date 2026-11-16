@@ -17,7 +17,7 @@ const state = {view:1, combo:"12", segment:"all", filters:{
 const descriptions = {
   1:["DASHBOARD 1 – Cơ cấu khách hàng theo sản phẩm và tổ hợp mua","Khách hàng đã mua sản phẩm nào, mua riêng hay theo tổ hợp nào?"],
   2:["DASHBOARD 2 – Thực trạng mua kết hợp và mua bổ sung","Khách hàng mua cùng lúc hay bổ sung sản phẩm theo thời gian?"],
-  3:["DASHBOARD 3 – DOANH SỐ VÀ MỨC ĐỘ MUA BỔ SUNG SẢN PHẨM","Cơ cấu doanh số, giá trị giao dịch mua bổ sung và khoảng trống mua sản phẩm."]
+  3:["DASHBOARD 3 – DOANH SỐ VÀ TÌNH HÌNH MUA SẢN PHẨM BỔ TRỢ","Cơ cấu doanh số, doanh số mua mới sản phẩm bổ trợ và tình hình đã mua/chưa từng mua."]
 };
 
 function kpi(label,value,unit="",foot="",variant="") {
@@ -152,7 +152,7 @@ function revenueCombo(items) {
     ${legendSVG([[C.sky,"Đơn sản phẩm"],[C.navy,"Đa sản phẩm"]],95,13)}
     <line x1="495" y1="9" x2="517" y2="9" stroke="${C.orange}" stroke-width="3"/>
     <circle cx="506" cy="9" r="3.4" fill="${C.orange}"/>
-    <text x="525" y="13" class="svg-small">Tỷ trọng đa SP</text>`;
+    <text x="525" y="8" class="svg-small"><tspan x="525">Tỷ trọng doanh số nhóm khách</tspan><tspan x="525" dy="11">mua nhiều sản phẩm (%)</tspan></text>`;
   let path=[];
   items.forEach((r,i)=>{
     const x=111+i*193,w=77,b1=r.single/max*168,b2=r.multi/max*168,ratio=r.multi/Math.max(0.00001,r.single+r.multi);
@@ -169,7 +169,7 @@ function revenueCombo(items) {
   out+=`<polyline points="${path.map(p=>p.join(",")).join(" ")}" fill="none" stroke="${C.orange}" stroke-width="3" stroke-linejoin="round"/>`;
   path.forEach(([x,y],i)=>{
     const r=items[i],ratio=r.multi/Math.max(0.00001,r.multi+r.single);
-    out+=`<circle cx="${x}" cy="${y}" r="5" fill="${C.orange}" stroke="#fff" stroke-width="2" data-tip="Tỷ trọng doanh số đa SP: ${pct(r.multi,r.multi+r.single)}"/>
+    out+=`<circle cx="${x}" cy="${y}" r="5" fill="${C.orange}" stroke="#fff" stroke-width="2" data-tip="Tỷ trọng doanh số nhóm khách mua nhiều sản phẩm: ${pct(r.multi,r.multi+r.single)}"/>
       <text x="${x+12}" y="${base-(r.single+r.multi)/max*168-11}" font-size="11" font-weight="800" fill="#c57d39">${pct(r.multi,r.multi+r.single)}</text>`;
   });
   return out+"</svg>";
@@ -179,7 +179,7 @@ function waterfall(obj) {
   const W=710,H=260,base=220,top=24,max=Math.max(50,Math.ceil(totalAmount*1.12/50)*50),left=58;
   const values="BCDE".split("").map(code=>({code,value:obj[code]}));
   const sum=values.reduce((acc,o)=>acc+o.value,0);
-  let out=`<svg class="chart-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Waterfall giá trị giao dịch mua bổ sung sau sản phẩm A">
+  let out=`<svg class="chart-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Waterfall doanh số mua mới các sản phẩm bổ trợ sau AMIS Kế toán">
     <text x="9" y="15" class="svg-small">Triệu đồng</text>
     ${[0,1,2,3].map(i=>max*i/4).map(n=>`<line x1="${left}" x2="694" y1="${base-n/max*(base-top)}" y2="${base-n/max*(base-top)}" class="grid-line"/><text x="48" y="${base-n/max*(base-top)+4}" class="svg-tick" text-anchor="end">${nf(n,n<20?1:0)}</text>`).join("")}`;
   let subtotal=0;
@@ -191,12 +191,12 @@ function waterfall(obj) {
     out+=`<g data-filter="product:${r.code}" tabindex="0" role="button" data-tip="${r.code} · ${esc(PRODUCT[r.code])}: ${nf(r.value,2)} triệu đồng · Bấm để lọc khách sở hữu sản phẩm">
        <rect x="${x}" y="${yNow}" width="${w}" height="${yPrev-yNow}" rx="3" fill="${col}"/>
        <text x="${x+w/2}" y="${yNow-8}" text-anchor="middle" class="svg-value" font-size="11">+${nf(r.value,2)}</text>
-       <text x="${x+w/2}" y="241" text-anchor="middle" class="svg-label">${r.code}</text>
+       <text x="${x+w/2}" y="240" text-anchor="middle" class="svg-label" font-size="10">${r.code==="E"?`<tspan x="${x+w/2}" dy="-2">JetPay</tspan><tspan x="${x+w/2}" dy="11">BankHub</tspan>`:esc(PRODUCT[r.code])}</text>
        ${i<3?`<line x1="${x+w}" x2="${x+125}" y1="${yNow}" y2="${yNow}" stroke="#a3b5cc" stroke-dasharray="3 3"/>`:""}
       </g>`;
   });
   const ty=base-sum/max*(base-top);
-  out+=`<g data-tip="Tổng trong phạm vi mua mới B–E sau A: ${nf(sum,2)} triệu đồng; không đại diện toàn bộ doanh số bán chéo">
+  out+=`<g data-tip="Tổng doanh số mua mới các sản phẩm bổ trợ sau AMIS Kế toán: ${nf(sum,2)} triệu đồng; không đại diện toàn bộ doanh số bán chéo">
     <rect x="584" y="${ty}" width="79" height="${base-ty}" rx="3" fill="${C.navy}"/>
     <text x="623" y="${ty-9}" text-anchor="middle" class="svg-value" font-size="12">${nf(sum,2)}</text>
     <text x="623" y="241" text-anchor="middle" class="svg-label">Tổng</text></g>`;
@@ -205,19 +205,19 @@ function waterfall(obj) {
 function butterfly(data) {
   const W=710,H=252,mid=354,leftEnd=319,rightStart=390,scale=215/Math.max(1,data.base);
   let out=`<svg class="chart-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="So sánh số khách đã mua và chưa mua sản phẩm bổ trợ trên tập khách A">
-    ${legendSVG([[C.blue,"Đã mua"],[C.orangePale,"Chưa mua"]],203,16)}
+    ${legendSVG([[C.blue,"Đã mua"],[C.orangePale,"Chưa từng mua"]],203,16)}
     ${["B","C","D","E"].map((p,i)=>{
       const y=37+i*44,b=data.bought[p],m=data.missing[p],bW=b*scale,mW=m*scale;
-      return `<g data-tip="${esc(PRODUCT[p])}: đã mua ${nf(b)} KH; chưa mua ${nf(m)} KH · ${pct(m,data.base)} trên ${nf(data.base)} KH có A">
+      return `<g data-tip="${esc(PRODUCT[p])}: đã mua ${nf(b)} KH; chưa từng mua ${nf(m)} KH · ${pct(m,data.base)} trên ${nf(data.base)} KH từng mua AMIS Kế toán">
         <rect x="${leftEnd-bW}" y="${y}" width="${bW}" height="25" rx="4" fill="${C.blue}" data-filter="status:${p}:owned" tabindex="0" role="button"/>
         <rect x="${rightStart}" y="${y}" width="${mW}" height="25" rx="4" fill="${C.orangePale}" data-filter="status:${p}:missing" tabindex="0" role="button"/>
         <text x="${leftEnd-bW-8}" y="${y+17}" text-anchor="end" class="svg-value">${b} (${pct(b,data.base)})</text>
         <text x="${rightStart+mW+8}" y="${y+17}" text-anchor="start" class="svg-value">${m} (${pct(m,data.base)})</text>
-        <text x="${mid+1}" y="${y+17}" text-anchor="middle" class="svg-label" font-weight="800">${p}</text>
+        <text x="${mid+1}" y="${y+16}" text-anchor="middle" fill="#35688d" font-size="9.5" font-weight="800">${p==="E"?`<tspan x="${mid+1}" dy="-5">JetPay</tspan><tspan x="${mid+1}" dy="11">BankHub</tspan>`:esc(PRODUCT[p])}</text>
       </g>`;
     }).join("")}
     <text x="190" y="237" text-anchor="middle" class="svg-small">Đã mua sản phẩm bổ trợ</text>
-    <text x="513" y="237" text-anchor="middle" class="svg-small">Chưa mua sản phẩm bổ trợ</text>
+    <text x="513" y="237" text-anchor="middle" class="svg-small">Chưa từng mua sản phẩm bổ trợ</text>
     <line x1="350" y1="30" x2="350" y2="215" stroke="#e9eef6"/>
     <line x1="359" y1="30" x2="359" y2="215" stroke="#e9eef6"/>
   </svg>`;
@@ -226,7 +226,7 @@ function butterfly(data) {
 function heatmap(stats) {
   const rows=stats.slice(), labels={all:"Quy mô × ngành",industry:"Theo ngành nghề",size:"Theo quy mô",city:"Theo địa bàn"};
   if(!rows.length)return '<div class="no-data">Không có khách đã mua A trong nhóm đang lọc</div>';
-  let out=`<table class="heatmap" aria-label="Tỷ lệ khách hàng có A chưa mua B-E theo phân khúc">
+  let out=`<table class="heatmap" aria-label="Tỷ lệ khách hàng từng mua AMIS Kế toán nhưng chưa từng mua sản phẩm bổ trợ theo phân khúc">
     <thead><tr><th>${labels[state.segment]}</th>${"BCDE".split("").map(p=>`<th>${p} · ${PRODUCT[p]}</th>`).join("")}</tr></thead><tbody>`;
   rows.forEach(row=>{
     const shortLabel=row.label.replace("Doanh nghiệp siêu nhỏ","Siêu nhỏ").replace("Doanh nghiệp nhỏ","DN nhỏ")
@@ -236,12 +236,12 @@ function heatmap(stats) {
     "BCDE".split("").forEach(p=>{
       const n=row.missing[p],rate=n/Math.max(1,row.base),light=97-rate*48;
       const color=rate>.74?"#fff":"#174f81";
-      out+=`<td style="background:hsl(213 64% ${light}%);color:${color}" role="button" tabindex="0" data-filter="heat:${row.dimension}:${esc(row.label)}:${p}" data-tip="${esc(row.label)}: ${nf(n)}/${nf(row.base)} KH có A chưa mua ${PRODUCT[p]} (${pct(n,row.base)}).${row.base<30?" Cỡ mẫu nhỏ: chỉ mô tả nhóm này.":""} Bấm để lọc nhóm này">
+      out+=`<td style="background:hsl(213 64% ${light}%);color:${color}" role="button" tabindex="0" data-filter="heat:${row.dimension}:${esc(row.label)}:${p}" data-tip="${esc(row.label)}: ${nf(n)}/${nf(row.base)} KH từng mua AMIS Kế toán nhưng chưa từng mua ${PRODUCT[p]} (${pct(n,row.base)}).${row.base<30?" Cỡ mẫu nhỏ: chỉ mô tả nhóm này.":""} Bấm để lọc nhóm này">
         ${pct(n,row.base)}<span class="cell-n">(${nf(n)})</span></td>`;
     });
     out+="</tr>";
   });
-  out+=`</tbody></table><div class="heat-foot"><span>${state.segment==="all"?"Giao thoa quy mô × ngành: mỗi KH chỉ thuộc một hàng; ":""}Mẫu số: KH có A của từng hàng</span>
+  out+=`</tbody></table><div class="heat-foot"><span>${state.segment==="all"?"Giao thoa quy mô × ngành: mỗi KH chỉ thuộc một hàng; ":""}Mẫu số: KH từng mua AMIS Kế toán của từng hàng</span>
      <span class="heat-scale">Bấm ô để lọc sâu <i class="heat-gradient"></i> Tỷ lệ cao</span></div>`;
   return out;
 }
@@ -313,15 +313,15 @@ function dashboard3() {
   const geoButton=`<button type="button" class="geography-button" data-detail="3-05" title="Bảng đối chiếu Đà Nẵng, Huế, Quảng Ngãi và Quảng Trị">▦ Bảng 4 địa bàn</button>`;
   return `<div class="kpis">
     ${kpi(`Doanh số 5 sản phẩm năm ${state.filters.year}`,nf(totalRev,2),"tỷ đồng","Giá trị giao dịch chưa VAT","featured")}
-    ${kpi("Doanh số nhóm khách đa SP",nf(annual.multi,2),"tỷ đồng",pct(annual.multi,totalRev)+" doanh số 5 SP")}
-    ${kpi(`Mua mới SP khác sau A năm ${state.filters.year}`,nf(totalSupp,2),"triệu đồng","Chỉ mua mới B–E sau lần mua A đầu tiên","orange")}
-    ${kpi("Khách hàng chỉ mua A",nf(DATA.dashboard1.singleProduct.A),"KH",PRODUCT.A)}
+    ${kpi("Doanh số nhóm khách mua nhiều sản phẩm",nf(annual.multi,2),"tỷ đồng",pct(annual.multi,totalRev,2)+" doanh số 5 SP; không phải tổng doanh số bán chéo")}
+    ${kpi("Doanh số mua mới sản phẩm khác sau AMIS Kế toán",nf(totalSupp,2),"triệu đồng",`Giao dịch mua mới trong năm ${state.filters.year}, sau lần mua A đầu tiên`,"orange")}
+    ${kpi("Khách hàng từng mua AMIS Kế toán",nf(d.aSubset.base),"KH",`Mẫu số phân tích sản phẩm bổ trợ đến cuối ${state.filters.year}`)}
   </div>
   <div class="chart-grid revenue">
-    ${card("01 · Doanh số theo nhóm khách hàng 2023–2025","Cột: doanh số (tỷ đồng) · Đường: tỷ trọng nhóm đa SP",revenueCombo(d.revenue),"chart-butterfly")}
-    ${card(`02 · Giá trị mua mới sản phẩm khác sau AMIS Kế toán`,"Chỉ giao dịch mua mới B–E sau A, không phải tổng doanh số bán chéo · triệu đồng",waterfall(d.supplementalMoney),"chart-butterfly")}
-    ${card("03 · Khách đã mua A: đã mua và chưa mua B–E",`Mỗi cặp có mẫu số ${nf(d.aSubset.base)} khách đã mua A`,butterfly(d.aSubset),"chart-butterfly")}
-    ${card("04 · Khoảng trống mua sản phẩm theo phân khúc",state.segment==="all"?"Giao thoa quy mô × ngành · tỷ lệ chưa sở hữu B–E trong nhóm có A":"Theo từng nhóm · tỷ lệ KH có A chưa sở hữu B–E",heatmap(state.segment==="all"?
+    ${card("01 · Doanh số theo nhóm khách hàng giai đoạn 2023–2025","Cột: doanh số (tỷ đồng) · Đường: tỷ trọng doanh số nhóm khách mua nhiều sản phẩm (%)",revenueCombo(d.revenue),"chart-butterfly")}
+    ${card(`02 · Doanh số mua mới sản phẩm khác sau AMIS Kế toán năm ${state.filters.year}`,"Giao dịch mua mới sản phẩm bổ trợ sau khi mua AMIS Kế toán; không phải toàn bộ doanh số bán chéo · triệu đồng",waterfall(d.supplementalMoney),"chart-butterfly")}
+    ${card("03 · Khách hàng đã mua và chưa mua từng sản phẩm bổ trợ",`Mẫu số: ${nf(d.aSubset.base)} khách từng mua AMIS Kế toán đến cuối ${state.filters.year}`,butterfly(d.aSubset),"chart-butterfly")}
+    ${card("04 · Tỷ lệ chưa mua sản phẩm bổ trợ theo quy mô và ngành",state.segment==="all"?"Giao thoa quy mô × ngành · mẫu số mỗi ô: khách từng mua AMIS Kế toán của phân khúc":"Tỷ lệ chưa từng mua trong nhóm đã mua AMIS Kế toán · mẫu số riêng từng phân khúc",heatmap(state.segment==="all"?
       d.segments.sizeIndustry.map(r=>({...r,dimension:"sizeIndustry"})):
       d.segments[state.segment].map(r=>({...r,dimension:state.segment}))),"chart-heat",segmentSelect+geoButton)}
   </div>`;
@@ -335,6 +335,12 @@ function render() {
   document.getElementById("pageDescription").textContent=dynamicInsight();
   document.getElementById("pageNumber").textContent=String(state.view).padStart(2,"0");
   updateFilterControls();
+  if(state.view===3){
+    const filtered=activeEntries().some(([key])=>key!=="year")||state.filters.year!==2025;
+    document.getElementById("filterCountSummary").textContent=filtered
+      ? `Tệp đang xét: ${nf(DATA.dashboard1.totalCustomers)} khách hàng; dữ liệu giao dịch 2023–2025`
+      : "Tệp nghiên cứu: 1.480 khách hàng; dữ liệu giao dịch giai đoạn 2023–2025.";
+  }
   document.querySelectorAll(".tab").forEach(button=>{
     button.classList.toggle("active",Number(button.dataset.view)===state.view);
     button.setAttribute("aria-current",Number(button.dataset.view)===state.view?"page":"false");
@@ -370,11 +376,11 @@ function dynamicInsight() {
   }
   const rev=d3.revenue.find(r=>r.year===year),sum=rev.single+rev.multi,a=d3.aSubset.base,missing=d3.aSubset.missing.B;
   if(!sum)return `Tệp khách đã chọn không ghi nhận doanh số của 5 sản phẩm trong năm ${year}.${caution}`;
-  if(!a)return `Tệp đã lọc có doanh số ${nf(sum,2)} tỷ đồng năm ${year}; không có khách sở hữu A để phân tích khoảng trống B–E.${caution}`;
-  if(!hasDetailFilters)return `Khách đa sản phẩm đóng góp ${pct(rev.multi,sum)} doanh số năm ${year}; đồng thời, ${nf(missing)}/${nf(a)} khách sử dụng AMIS Kế toán chưa sở hữu meInvoice — tệp sàng lọc cơ hội bán chéo.`;
-  if(f.productStatus)return `Tệp đang xét có ${nf(total)} khách có A và ${f.productStatus.owned?"đã":"chưa"} sở hữu ${PRODUCT[f.productStatus.code]}; doanh số giao dịch năm ${year} đạt ${nf(sum,2)} tỷ đồng. Phân tích tiếp quy mô × ngành.${caution}`;
-  if(f.revenueClass||rev.multi===sum||rev.multi===0)return `Tệp đã lọc đóng góp ${nf(sum,2)} tỷ đồng doanh số năm ${year}; ${nf(missing)}/${nf(a)} khách có A chưa sở hữu meInvoice. Ưu tiên đối chiếu theo phân khúc.${caution}`;
-  return `Nhóm đa sản phẩm tạo ${nf(rev.multi,2)} tỷ đồng (${pct(rev.multi,sum)}) trên tệp lọc; ${nf(missing)}/${nf(a)} khách có A chưa sở hữu B — khoảng trống cần phân nhóm.${caution}`;
+  if(!a)return `Tệp đã lọc có doanh số ${nf(sum,2)} tỷ đồng năm ${year}; không có khách từng mua AMIS Kế toán để đối chiếu việc mua sản phẩm bổ trợ.${caution}`;
+  if(!hasDetailFilters)return `Năm ${year}, nhóm khách hàng mua nhiều sản phẩm đóng góp ${pct(rev.multi,sum,2)} doanh số của 5 sản phẩm. Trong ${nf(a)} khách hàng từng mua AMIS Kế toán, có ${nf(missing)} khách hàng chưa từng mua meInvoice.`;
+  if(f.productStatus)return `Tệp đang xét gồm ${nf(total)} khách từng mua AMIS Kế toán và ${f.productStatus.owned?"đã":"chưa từng"} mua ${PRODUCT[f.productStatus.code]}; doanh số giao dịch năm ${year} đạt ${nf(sum,2)} tỷ đồng.${caution}`;
+  if(f.revenueClass||rev.multi===sum||rev.multi===0)return `Tệp đang xét ghi nhận ${nf(sum,2)} tỷ đồng doanh số năm ${year}; trong ${nf(a)} khách từng mua AMIS Kế toán, có ${nf(missing)} khách chưa từng mua meInvoice.${caution}`;
+  return `Nhóm khách mua nhiều sản phẩm đóng góp ${nf(rev.multi,2)} tỷ đồng (${pct(rev.multi,sum,2)}) doanh số trong tệp lọc; ${nf(missing)}/${nf(a)} khách từng mua AMIS Kế toán chưa từng mua meInvoice.${caution}`;
 }
 function sampleCaution(n) {
   return n<30?` Cỡ mẫu nhỏ (n=${nf(n)}): kết quả chỉ mô tả nhóm đang lọc, không suy rộng.`:"";
@@ -596,29 +602,29 @@ function analysisDetails(id) {
     case "3-01": {
       const old=d3.revenue[0],oldShare=old.multi/(old.single+old.multi||1),newShare=yearRevenue.multi/(revTotal||1);
       Object.assign(result,{
-        lead:`Năm ${year}, khách đa sản phẩm đóng góp ${nf(yearRevenue.multi,2)} tỷ đồng (${pct(yearRevenue.multi,revTotal)}) trên ${nf(revTotal,2)} tỷ doanh số 5 sản phẩm.`,
-        takeaway:`Tỷ trọng doanh số nhóm đa sản phẩm ${newShare>oldShare?"cao hơn":newShare<oldShare?"thấp hơn":"bằng"} năm 2023 ${nf(Math.abs((newShare-oldShare)*100),1)} điểm phần trăm. Doanh số nhóm này là căn cứ định lượng vai trò mua kết hợp, không khẳng định nguyên nhân tăng doanh số.`,
+        lead:`Năm ${year}, nhóm khách mua nhiều sản phẩm đóng góp ${nf(yearRevenue.multi,2)} tỷ đồng (${pct(yearRevenue.multi,revTotal,2)}) trên ${nf(revTotal,2)} tỷ doanh số 5 sản phẩm.`,
+        takeaway:`Tỷ trọng doanh số nhóm khách mua nhiều sản phẩm ${newShare>oldShare?"cao hơn":newShare<oldShare?"thấp hơn":"bằng"} năm 2023 ${nf(Math.abs((newShare-oldShare)*100),1)} điểm phần trăm. Đây là tổng doanh số giao dịch của nhóm khách hàng này trong năm, không phải toàn bộ doanh số bán chéo.`,
         definition:`Chia doanh số 5 sản phẩm từng năm theo tình trạng sở hữu 1 hay từ 2 SP tại cuối năm đó; giá trị giao dịch chưa VAT, không đồng nhất với doanh thu kế toán.`,
-        rows:d3.revenue.map(r=>analysisRow(String(r.year),nf(r.single+r.multi,2)+" tỷ",`${nf(r.multi,2)} tỷ từ KH đa SP · ${pct(r.multi,r.single+r.multi)} tổng doanh số`))
+        rows:d3.revenue.map(r=>analysisRow(String(r.year),nf(r.single+r.multi,2)+" tỷ",`${nf(r.multi,2)} tỷ từ nhóm khách mua nhiều SP · ${pct(r.multi,r.single+r.multi,2)} tổng doanh số`))
       });break;
     }
     case "3-02": {
       const supp=d3.supplementalMoney,totalSupp=Object.values(supp).reduce((s,n)=>s+n,0);
       const ranked=Object.entries(supp).sort((x,y)=>y[1]-x[1]);
       Object.assign(result,{
-        lead:`Giá trị mua mới các sản phẩm khác sau AMIS Kế toán đạt ${nf(totalSupp,2)} triệu đồng năm ${year}; ${PRODUCT[ranked[0][0]]} chiếm ${pct(ranked[0][1],totalSupp)} chỉ tiêu này.`,
-        takeaway:`Đây là doanh số giao dịch mua mới sản phẩm B–E phát sinh sau khi khách đã mua A, không phải tổng doanh số bán chéo, cũng không phải tổng doanh thu kế toán. Cần đối chiếu thêm số khách và các trình tự mua khác ngoài A trước.`,
-        definition:`Chỉ cộng giao dịch loại “Mua mới” của sản phẩm B–E có ngày mua sau ngày mua A đầu tiên, phát sinh trong năm ${year}; đơn vị triệu đồng, chưa VAT. Không bao gồm mọi hình thức kết hợp hoặc bán chéo trong danh mục.`,
+        lead:`Doanh số mua mới các sản phẩm khác sau AMIS Kế toán đạt ${nf(totalSupp,2)} triệu đồng năm ${year}; ${PRODUCT[ranked[0][0]]} chiếm ${pct(ranked[0][1],totalSupp)} chỉ tiêu này.`,
+        takeaway:`Chỉ tiêu này cộng doanh số giao dịch mua mới từng sản phẩm bổ trợ phát sinh sau khi khách đã mua AMIS Kế toán; không phải toàn bộ doanh số bán chéo hay doanh thu kế toán.`,
+        definition:`Chỉ cộng giao dịch loại “Mua mới” của meInvoice, eSign, mTax và JetPay BankHub có ngày mua sau ngày mua AMIS Kế toán đầu tiên, phát sinh trong năm ${year}; đơn vị triệu đồng, chưa VAT.`,
         rows:ranked.map(([p,n])=>analysisRow(displayProduct(p),nf(n,2)+" triệu",pct(n,totalSupp)+" tổng giá trị mua sau A"))
       });break;
     }
     case "3-03": {
       const gap=Object.entries(d3.aSubset.missing).sort((x,y)=>y[1]-x[1])[0];
       Object.assign(result,{
-        lead:`Trong ${nf(a)} khách đã mua AMIS Kế toán, ${nf(gap[1])} khách chưa mua ${PRODUCT[gap[0]]} (${pct(gap[1],a)}) — khoảng trống sở hữu lớn nhất.`,
-        takeaway:`Ưu tiên khảo sát nhu cầu thực tế trong nhóm có A nhưng chưa sở hữu B–E; đây chỉ là chỉ báo về phạm vi sở hữu, không phải danh sách khách có nhu cầu chắc chắn.`,
-        definition:`Mỗi sản phẩm B–E được đối chiếu riêng trong ${nf(a)} khách đã sở hữu A; “đã mua” + “chưa mua” của từng sản phẩm bằng mẫu số này.`,
-        rows:"BCDE".split("").map(p=>analysisRow(displayProduct(p),nf(d3.aSubset.missing[p])+" KH chưa mua",`${nf(d3.aSubset.bought[p])} KH đã mua · ${pct(d3.aSubset.missing[p],a)} chưa mua`))
+        lead:`Trong ${nf(a)} khách từng mua AMIS Kế toán, có ${nf(gap[1])} khách chưa từng mua ${PRODUCT[gap[0]]} (${pct(gap[1],a)}), nhiều nhất trong bốn sản phẩm bổ trợ.`,
+        takeaway:"Tình trạng chưa từng mua sản phẩm chỉ cho biết lịch sử giao dịch trong dữ liệu CRM, không phản ánh trực tiếp nhu cầu hoặc mức độ sẵn sàng mua.",
+        definition:`Mỗi sản phẩm bổ trợ được đối chiếu riêng trong ${nf(a)} khách từng mua AMIS Kế toán; số khách đã mua và chưa từng mua cộng lại bằng mẫu số của từng sản phẩm.`,
+        rows:"BCDE".split("").map(p=>analysisRow(displayProduct(p),nf(d3.aSubset.missing[p])+" KH chưa từng mua",`${nf(d3.aSubset.bought[p])} KH đã mua · ${pct(d3.aSubset.missing[p],a)} chưa từng mua`))
       });break;
     }
     case "3-04": {
@@ -626,10 +632,10 @@ function analysisDetails(id) {
       const eligible=segments.filter(r=>r.base>=30);
       const best=eligible.slice().sort((x,y)=>(y.missing.B/y.base||0)-(x.missing.B/x.base||0)||y.base-x.base)[0];
       Object.assign(result,{
-        lead:best?`Trong các phân khúc có ít nhất 30 KH sở hữu A, nhóm ${best.label} có ${nf(best.missing.B)}/${nf(best.base)} khách chưa sở hữu meInvoice (${pct(best.missing.B,best.base)}).`:`Không có phân khúc nào đạt 30 KH có A trong tệp đang lọc; các tỷ lệ chỉ có ý nghĩa mô tả.`,
-        takeaway:`Phân khúc kết hợp quy mô × ngành giúp xác định tệp sàng lọc không trùng khách giữa các hàng. Khoảng trống sở hữu B–E chưa đồng nghĩa nhu cầu mua; cần đánh giá mức phù hợp và khả năng chuyển đổi.`,
-        definition:`${state.segment==="all"?"Mỗi hàng là giao thoa quy mô × ngành; mỗi KH thuộc đúng một hàng. ":"Mỗi hàng là một nhóm phân loại riêng. "}Mẫu số từng hàng là số KH đã mua A trong nhóm; tỷ lệ = số KH chưa mua sản phẩm / mẫu số hàng. Hàng n<30 được cảnh báo.`,
-        rows:segments.slice().sort((x,y)=>y.base-x.base).slice(0,10).map(r=>analysisRow(r.label,nf(r.base)+" KH có A",`${pct(r.missing.B,r.base)} chưa có B · ${pct(r.missing.C,r.base)} chưa có C${r.base<30?" · Cỡ mẫu nhỏ":""}`))
+        lead:best?`Trong các phân khúc có ít nhất 30 KH từng mua AMIS Kế toán, nhóm ${best.label} có ${nf(best.missing.B)}/${nf(best.base)} khách chưa từng mua meInvoice (${pct(best.missing.B,best.base)}).`:"Không có phân khúc nào đạt 30 khách từng mua AMIS Kế toán trong tệp đang lọc; các tỷ lệ chỉ có ý nghĩa mô tả.",
+        takeaway:"Biểu đồ so sánh tỷ lệ chưa từng mua sản phẩm bổ trợ theo từng phân khúc. Chỉ tiêu phản ánh lịch sử mua trong CRM, không khẳng định nhu cầu chưa được đáp ứng.",
+        definition:`${state.segment==="all"?"Mỗi hàng là giao thoa quy mô × ngành; mỗi KH thuộc đúng một hàng. ":"Mỗi hàng là một nhóm phân loại riêng. "}Mẫu số từng hàng là số KH từng mua AMIS Kế toán trong nhóm; tỷ lệ = số KH chưa từng mua sản phẩm bổ trợ / mẫu số hàng. Hàng n<30 được cảnh báo.`,
+        rows:segments.slice().sort((x,y)=>y.base-x.base).slice(0,10).map(r=>analysisRow(r.label,nf(r.base)+" KH từng mua AMIS Kế toán",`${pct(r.missing.B,r.base)} chưa từng mua meInvoice · ${pct(r.missing.C,r.base)} chưa từng mua eSign${r.base<30?" · Cỡ mẫu nhỏ":""}`))
       });break;
     }
     case "3-05": {
