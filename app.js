@@ -113,15 +113,13 @@ function stackedYears(rows) {
   return out+"</svg>";
 }
 function sequenceTable(pairs) {
-  const existing=pairs.filter(r=>r.total).sort((a,b)=>b.total-a.total);
-  return `<div class="sequence-table-wrap"><table class="sequence-table" aria-label="Trình tự mua giữa các cặp sản phẩm và khoảng cách trung vị">
-    <thead><tr><th>Cặp SP</th><th>Chiều thuận</th><th>Chiều ngược</th><th>Cùng ngày</th><th>Trung vị (ngày)</th></tr></thead>
-    <tbody>${existing.map(r=>`<tr data-tip="${esc(PRODUCT[r.a])} và ${esc(PRODUCT[r.b])}: ${nf(r.total)} KH cùng sở hữu; trung vị ${r.medianDays===null?"không có":nf(r.medianDays,1)+" ngày"} giữa hai ngày mua khác nhau">
-      <td><strong>${r.a}–${r.b}</strong><small>${nf(r.total)} KH</small></td>
-      <td><strong>${nf(r.forward)}</strong><small>${r.a}→${r.b}</small></td>
-      <td><strong>${nf(r.reverse)}</strong><small>${r.b}→${r.a}</small></td>
-      <td>${nf(r.same)}</td><td><strong>${r.medianDays===null?"—":nf(r.medianDays,1)}</strong></td>
-    </tr>`).join("")}</tbody></table></div><div class="sequence-foot">Toàn bộ tệp năm ${state.filters.year}; bảng không chịu tác động của bộ lọc phân khúc. Trung vị không tính các cặp mua cùng ngày.</div>`;
+  return `<div class="sequence-table-wrap"><table class="sequence-table" aria-label="Trình tự mua, số khách hàng và thời gian trung vị">
+    <thead><tr><th>Trình tự mua</th><th>Số khách hàng</th><th>Thời gian trung vị (ngày)</th></tr></thead>
+    <tbody>${pairs.map(r=>`<tr data-tip="${esc(PRODUCT[r.first])} trước ${esc(PRODUCT[r.second])}: ${nf(r.count)} khách; thời gian trung vị ${nf(Math.round(r.medianDays))} ngày">
+      <td><strong>${esc(PRODUCT[r.first])} → ${esc(PRODUCT[r.second])}</strong></td>
+      <td><strong>${nf(r.count)}</strong></td>
+      <td><strong>${nf(Math.round(r.medianDays))}</strong></td>
+    </tr>`).join("")}</tbody></table></div><div class="sequence-foot">Thời gian trung vị được tính theo từng trình tự mua, không bao gồm trường hợp mua cùng ngày. Số liệu lũy kế đến cuối ${state.filters.year}; bảng không chịu tác động của bộ lọc phân khúc.</div>`;
 }
 function legendSVG(items,x,y) {
   return items.map(([color,label],i)=>`<rect x="${x+i*200}" y="${y-8}" width="9" height="9" rx="2" fill="${color}"/>
@@ -283,7 +281,7 @@ function dashboard2() {
     ${kpi("Khách hàng đa sản phẩm",nf(multi),"KH",`Lũy kế đến cuối ${state.filters.year}`,"featured")}
     ${kpi("Mua kết hợp ngay lần đầu",nf(now.initial),"KH",`${nf(now.initialThen)} KH tiếp tục mua bổ sung`)}
     ${kpi("Có lịch sử mua bổ sung",nf(now.supplemental),"KH",`${nf(now.initialThen)} KH giao với nhóm kết hợp ban đầu`,"orange")}
-    ${kpi("Trình tự A → B",nf(ab["A→B"]),"KH","Mua A trước, sau đó mua B")}
+    ${kpi("Mua AMIS Kế toán trước meInvoice",nf(ab["A→B"]),"KH","Mua A trước, sau đó mua B")}
   </div>
   <div class="chart-grid behavior">
     ${card("01 · Ba nhóm hành vi mua sản phẩm 2023–2025","Ba nhóm không trùng nhau: kết hợp ban đầu, kết hợp rồi mua thêm, hoặc mua thêm sau một SP đầu tiên",stackedYears(d.byYear),"chart-large")}
@@ -293,7 +291,7 @@ function dashboard2() {
       {label:"A + B cùng ngày",n:ab["A+B"],color:C.sky,filter:"A+B"},
     ],totalAb,nf(totalAb),"KHÁCH HÀNG","ab"),"chart-large")}
     ${card("03 · Vai trò từng sản phẩm trong trình tự mua","Tỷ trọng và số KH mua sản phẩm ở lần đầu hoặc mua bổ sung sau lần đầu",roleBars(d.byProductRole),"chart-large chart-role")}
-    ${card("04 · Trình tự mua giữa các cặp sản phẩm","Số KH và trung vị ngày giữa hai lần mua · toàn bộ tệp theo năm",sequenceTable(pairStats),"chart-large chart-sequence")}
+    ${card("04 · Trình tự và thời gian mua giữa các sản phẩm","Số khách hàng và thời gian trung vị theo từng chiều mua",sequenceTable(pairStats),"chart-large chart-sequence")}
   </div>`;
 }
 function geoTable(rows) {
@@ -586,14 +584,13 @@ function analysisDetails(id) {
     }
     case "2-04": {
       const pairs=SEQUENCE_SUMMARY.byYear[String(state.filters.year)]||[];
-      const ranked=pairs.slice().sort((a,b)=>b.total-a.total);
-      const top=ranked[0];
+      const top=pairs.slice().sort((a,b)=>b.count-a.count)[0];
       Object.assign(result,{
-        lead:top&&top.total?`Cặp ${top.a}–${top.b} được mua bởi ${nf(top.total)} khách; ${nf(top.forward)} khách mua ${top.a} trước ${top.b}, ${nf(top.reverse)} mua theo chiều ngược lại và ${nf(top.same)} mua cùng ngày.`:"Không có cặp sản phẩm được mua chung trong tệp đang xét.",
-        takeaway:"Đối chiếu trình tự và khoảng cách giữa các lần mua giúp phân biệt tổ hợp mua cùng ngày với mua bổ sung sau lần đầu. Một khách có thể xuất hiện trong nhiều cặp nếu đã mua từ ba sản phẩm trở lên.",
-        definition:`Các cặp dùng ngày mua mới đầu tiên của từng sản phẩm, không lấy ngày gia hạn. Trung vị là trung vị số ngày chênh lệch tuyệt đối của các cặp được mua khác ngày; loại trừ nhóm cùng ngày. Bảng tổng hợp trên toàn bộ tệp khách lũy kế đến cuối ${year}, độc lập với các bộ lọc phân khúc trên màn hình.`,
-        rows:ranked.filter(r=>r.total).map(r=>analysisRow(`${r.a}–${r.b}: ${PRODUCT[r.a]} + ${PRODUCT[r.b]}`,
-          nf(r.total)+" KH",`${nf(r.forward)} ${r.a}→${r.b} · ${nf(r.reverse)} ${r.b}→${r.a} · ${nf(r.same)} cùng ngày · Trung vị ${r.medianDays===null?"—":nf(r.medianDays,1)+" ngày"}`))
+        lead:top?`Trình tự ${PRODUCT[top.first]} → ${PRODUCT[top.second]} có ${nf(top.count)} khách hàng; thời gian trung vị giữa hai lần mua là ${nf(Math.round(top.medianDays))} ngày.`:"Không có trình tự mua bổ sung trong tệp đang xét.",
+        takeaway:"Bảng thể hiện riêng từng chiều mua, không gộp hai chiều của cùng một cặp sản phẩm. Một khách hàng có thể xuất hiện trong nhiều trình tự khi sở hữu từ ba sản phẩm trở lên.",
+        definition:`Thời gian trung vị được tính từ ngày mua mới đầu tiên của sản phẩm trước đến ngày mua mới đầu tiên của sản phẩm sau; không lấy ngày gia hạn và không bao gồm trường hợp mua cùng ngày. Trung vị được làm tròn đến ngày nguyên khi hiển thị. Số liệu lũy kế đến cuối ${year}, độc lập với các bộ lọc phân khúc.`,
+        rows:pairs.map(r=>analysisRow(`${PRODUCT[r.first]} → ${PRODUCT[r.second]}`,
+          nf(r.count)+" KH",`Thời gian trung vị: ${nf(Math.round(r.medianDays))} ngày`))
       });break;
     }
     case "3-01": {

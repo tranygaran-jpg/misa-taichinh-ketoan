@@ -46,8 +46,9 @@
 .sequence-table{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;color:#285779;font-size:12px}
 .sequence-table th{position:sticky;top:0;background:#e9f6fd;color:#286c9c;font-size:10.5px;
   text-align:center;padding:10px 4px;z-index:1;border-bottom:1px solid #cde2ef}
-.sequence-table th:first-child{width:19%;text-align:left;padding-left:10px}
-.sequence-table th:nth-child(2),.sequence-table th:nth-child(3){width:23%}
+.sequence-table th:first-child{width:49%;text-align:left;padding-left:10px}
+.sequence-table th:nth-child(2){width:22%}
+.sequence-table th:nth-child(3){width:29%}
 .sequence-table td{border-bottom:1px solid #e4f0f7;padding:6px 5px;text-align:center;font-weight:600}
 .sequence-table td:first-child{text-align:left;padding-left:11px}
 .sequence-table td strong{font-weight:800;color:#14598c}
